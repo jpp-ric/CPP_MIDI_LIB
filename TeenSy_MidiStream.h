@@ -8,5 +8,5 @@ class TeenSy_MidiStream: public IMidiStream {
        void write(int midiCode);
        
     private:       
-        HardwareSerial* inputOutputStream = NULL;
+        HardwareSerial* inputOutputStream = 0;
  };
