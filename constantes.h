@@ -1,0 +1,1 @@
+#define CODE_SYNCHRO_NOTE 254
