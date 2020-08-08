@@ -171,7 +171,6 @@ void MidiApplication::handleMidiCode()
         this->play_ok = false;
         this->rec_ok = false;
         this->data2 = 200;
-        //Serial.println("ok");
       }
       if (this->data2 == 10 && this->data3 > 0)
       {
