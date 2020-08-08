@@ -9,4 +9,5 @@ class TeenSy_Displayer: public IDisplayer {
        
     private:       
         usb_serial_class* displayer = 0;
+        int sddd; 
  };

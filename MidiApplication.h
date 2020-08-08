@@ -15,7 +15,7 @@ public:
     void play();
 
     void setDisplayer(IDisplayer* displayer);
-
+    bool essai = true;
     bool play_ok = false;
     bool rec_ok = false;    
     float i_count = 0.;
