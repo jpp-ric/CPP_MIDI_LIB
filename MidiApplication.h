@@ -42,6 +42,8 @@ private:
     int data2 = 60;
     int data3 = 100;
 
+    int command_nt = 144; 
+
     unsigned long midiCodeIndex = 0;
     bool start_rec = false;
 

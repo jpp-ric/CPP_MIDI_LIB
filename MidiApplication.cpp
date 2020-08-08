@@ -62,7 +62,7 @@ void MidiApplication::handleMidiCode()
 
   // this->getDisplayer()->display(data);
 
-  int command_nt = 144;
+  
 
   //*****************************data mid********************************
   //**********************************************************************
@@ -99,7 +99,7 @@ void MidiApplication::handleMidiCode()
       */
 
       if (this->command > 143 && this->command < 160)
-        command_nt = this->command;
+        this->command_nt = this->command;
       if (this->flag_split && this->data2 < 54 && this->command == 144)
       {
         this->command = 145;
@@ -193,24 +193,24 @@ void MidiApplication::handleMidiCode()
       if (this->data2 == 1)
       {
         this->data2 = 7; //level
-        this->command = (command_nt - 143) + 175;
+        this->command = (this->command_nt - 143) + 175;
       }
       //************************reverb*************************
       if (this->data2 == 2)
       {
         this->data2 = 91; //reverb
-        this->command = (command_nt - 143) + 175;
+        this->command = (this->command_nt - 143) + 175;
       }
       //************************instr chang********************
       else if (this->data2 == 11)
       {
-        this->command = (command_nt - 143) + 191;
+        this->command = (this->command_nt - 143) + 191;
         this->prgm_chg_instm(); //instr chang decr
         return;
       }
       else if (this->data2 == 12)
       {
-        this->command = (command_nt - 143) + 191;
+        this->command = (this->command_nt - 143) + 191;
         this->prgm_chg_instp(); //instr chang incr
         return;
       }
@@ -292,8 +292,6 @@ void MidiApplication::prgm_chg_instp()
 
 void MidiApplication::record()
 {
-  int command_nt = 144;
-
   if (this->midiCodeIndex < MAX_NB_MIDI_CODES)
   {
     if (this->data2 != 96)
@@ -304,7 +302,7 @@ void MidiApplication::record()
         this->i_count = 0.;
       }
       if (this->command > 143 && this->command < 160)
-        command_nt = this->command;
+        this->command_nt = this->command;
       if (this->flag_split && this->data2 < 54 && this->command == 144)
       {
         this->command = 145;
