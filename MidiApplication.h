@@ -7,7 +7,6 @@
 class MidiApplication
 {
 public:
-    int toto = 5;
     MidiApplication(IMidiStream *midiStream);
     void init();
     IMidiStream *getMidiStream();
