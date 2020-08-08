@@ -1,16 +1,19 @@
 #include <MidiApplication.h>
 #include <IMidiStream.h>
+#include <IDisplayer.h>
 
-MidiApplication::MidiApplication(IMidiStream* midiStream) {
-    this->midiStream = midiStream;
+MidiApplication::MidiApplication(IMidiStream *midiStream)
+{
+  this->midiStream = midiStream;
 }
 
-IMidiStream* MidiApplication::getMidiStream() {
-    return(this->midiStream);
+IMidiStream* MidiApplication::getMidiStream()
+{
+  return (this->midiStream);
 }
 
-
-void MidiApplication::init() {
+void MidiApplication::init()
+{
   this->midiStream->write(192);
   this->midiStream->write(0);
   this->midiStream->write(0);
@@ -45,301 +48,323 @@ void MidiApplication::init() {
   this->midiStream->write(180);
   this->midiStream->write(7);
   this->midiStream->write(90);
-
 }
 
-
-void MidiApplication::treatMidiCode(int midiCode) {
-    //*****************************data mid********************************
-    //**********************************************************************
-    if (data > 253)
-    {
-      return; // other MIDI command
-    }
-    //*************************statu-mid**********************************************
-    else if (data > 127)
-    {
-      command = data; // Data2 OFF or ON command
-    }
-    //*********************second byte*********************************************************
-    else if (flag == 0)
-    {
-      Data2 = data;
-
-      flag = 1;
-    }
-    //**********************third byte******************************************************
-    else if (flag == 1)
-    {
-      Data3 = data;
-      flag = 0;
-      //***********************note on off******************************************************
-
-      if (command < 160 && command > 0)
-      {
-
-        /* if (command == 144 && flag_split == 1)   
-      split_kb();*/
-
-        if (command > 143 && command < 160)
-          command_nt = command;
-        if (flag_split == 1 && Data2 < 54 && command == 144)
-        {
-          command = 145;
-        }
-        if (flag_split == 1 && Data2 < 54 && command == 128)
-        {
-          command = 129;
-        }
-
-        this->midiStream->write(command);
-        this->midiStream->write(Data2);
-        this->midiStream->write(Data3);
-
-        if (flag_split == 1)
-        {
-          if (command == 129)
-            command = 128;
-          if (command == 145)
-            command = 144;
-        }
-
-        //********************switch rec_ok note 96******************
-        //*****************rec on*********************************
-        if (Data2 == 96 && rec_ok == 0)
-        {
-          command = 128;
-          rec_ok = 1;
-          st_rec = 1;
-          indxmid = 0;
-          i_count = 0.;
-          x_count = 1.;
-          // Serial.println(i_count);
-        }
-
-        if (rec_ok == 1)
-          record();
-      }
-
-      //Serial.println(command);
-      //****************************control********************
-      if (command > 159)
-      {
-        //*********************flag split***************
-        if (Data2 == 19 && Data3 > 0 && switch_splt == 0)
-        {
-          flag_split = 1;
-          Data2 = 0; //on
-          switch_splt = 1;
-          Serial.print(switch_splt);
-        }
-        if (Data2 == 19 && Data3 > 0 && switch_splt == 1)
-        {
-          flag_split = 0; //on
-          switch_splt = 0;
-          Data2 = 0;
-          Serial.print(switch_splt);
-        }
-        //********************stop*****************************
-
-        if (Data2 == 14 && Data3 > 0)
-        {
-          for (int i = 1; i < 17; i++)
-          {
-            this->midiStream->write(175 + i);
-            this->midiStream->write(123);
-            this->midiStream->write(0);
-          }
-          play_ok = 0;
-          rec_ok = 0;
-          Data2 = 200;
-          //Serial.println("ok");
-        }
-        if (Data2 == 10 && Data3 > 0)
-        {
-          Data3 = 0;
-          trsf_data_sd();
-        }
-        //********************play*************************
-        if (Data2 == 15 && Data3 > 0)
-        {
-          play_ok = 1;
-          i_count = 0.;
-          indxmid = 0;
-
-          play();
-          Data2 = 200;
-        }
-        //**************************************************
-        //**********************level****************************
-        if (Data2 == 1)
-        {
-          Data2 = 7; //level
-          command = (command_nt - 143) + 175;
-        }
-        //************************reverb*************************
-        if (Data2 == 2)
-        {
-          Data2 = 91; //reverb
-          command = (command_nt - 143) + 175;
-        }
-        //************************instr chang********************
-        else if (Data2 == 11)
-        {
-          command = (command_nt - 143) + 191;
-          prgm_chg_instm(); //instr chang decr
-          return;
-        }
-        else if (Data2 == 12)
-        {
-          command = (command_nt - 143) + 191;
-          prgm_chg_instp(); //instr chang incr
-          return;
-        }
-        //*********************send control************************
-        this->midiStream->write(command); //2 bytes only to prgm chang******
-        this->midiStream->write(Data2);   //***********************************
-
-        if (command != 192 && command > 0) // if not prg chang send third byte
-          this->midiStream->write(Data3);
-        //***********************************************************
-      }
-    }
+int MidiApplication::getMidiStreamCurrentMidiCode()
+{
+  return (this->getMidiStream()->read());
 }
 
+void MidiApplication::handleMidiCode()
+{
 
+  int data = this->getMidiStreamCurrentMidiCode();
+
+  // this->getDisplayer()->display(data);
+
+  int command_nt = 144;
+
+  //*****************************data mid********************************
+  //**********************************************************************
+  if (data > 253)
+  {
+    return; // other MIDI this->command
+  }
+  //*************************statu-mid**********************************************
+  else if (data > 127)
+  {
+    this->command = data; // this->data2 OFF or ON this->command
+  }
+  //*********************second byte*********************************************************
+  else if (!this->flag)
+  {
+    this->data2 = data;
+
+    this->flag = true;
+  }
+  //**********************third byte******************************************************
+  else if (this->flag)
+  {
+    this->data3 = data;
+    this->flag = false;
+
+    //***********************note on off******************************************************
+
+    if (this->command < 160 && this->command > 0)
+    {
+
+      /* if (this->command == 144 && this->flag_split)  { 
+          this->split_kb();
+        }
+      */
+
+      if (this->command > 143 && this->command < 160)
+        command_nt = this->command;
+      if (this->flag_split && this->data2 < 54 && this->command == 144)
+      {
+        this->command = 145;
+      }
+      if (this->flag_split && this->data2 < 54 && this->command == 128)
+      {
+        this->command = 129;
+      }
+
+      this->midiStream->write(this->command);
+      this->midiStream->write(this->data2);
+      this->midiStream->write(this->data3);
+
+
+      if (this->flag_split)
+      {
+        if (this->command == 129)
+          this->command = 128;
+        if (this->command == 145)
+          this->command = 144;
+      }
+
+      //********************switch this->rec_ok note 96******************
+      //*****************rec on*********************************
+      if (this->data2 == 96 && !this->rec_ok)
+      {
+        this->command = 128;
+        this->rec_ok = true;
+        this->start_rec = true;
+        this->midiCodeIndex = 0;
+        this->i_count = 0.;
+        this->x_count = 1.;
+      }
+
+      if (this->rec_ok)
+      {
+        this->record();
+      }
+    }
+
+    //****************************control********************
+    if (this->command > 159)
+    {
+      //*********************flag split***************
+      if (this->data2 == 19 && this->data3 > 0 && !this->switch_split)
+      {
+        this->flag_split = 1;
+        this->data2 = 0; //on
+        this->switch_split = true;
+        // this->getDisplayer()->display(this->switch_split);
+      }
+      if (this->data2 == 19 && this->data3 > 0 && this->switch_split)
+      {
+        this->flag_split = false; //on
+        this->switch_split = false;
+        this->data2 = 0;
+        // this->getDisplayer()->display(this->switch_split);
+      }
+      //********************stop*****************************
+
+      if (this->data2 == 14 && this->data3 > 0)
+      {
+        for (int i = 1; i < 17; i++)
+        {
+          this->midiStream->write(175 + i);
+          this->midiStream->write(123);
+          this->midiStream->write(0);
+        }
+        this->play_ok = false;
+        this->rec_ok = false;
+        this->data2 = 200;
+        //Serial.println("ok");
+      }
+      if (this->data2 == 10 && this->data3 > 0)
+      {
+        this->data3 = 0;
+        // trsf_data_sd();
+      }
+      //********************play*************************
+      if (this->data2 == 15 && this->data3 > 0)
+      {
+        this->play_ok = true;
+        this->i_count = 0.;
+        this->midiCodeIndex = 0;
+
+        this->play();
+        this->data2 = 200;
+      }
+      //**************************************************
+      //**********************level****************************
+      if (this->data2 == 1)
+      {
+        this->data2 = 7; //level
+        this->command = (command_nt - 143) + 175;
+      }
+      //************************reverb*************************
+      if (this->data2 == 2)
+      {
+        this->data2 = 91; //reverb
+        this->command = (command_nt - 143) + 175;
+      }
+      //************************instr chang********************
+      else if (this->data2 == 11)
+      {
+        this->command = (command_nt - 143) + 191;
+        this->prgm_chg_instm(); //instr chang decr
+        return;
+      }
+      else if (this->data2 == 12)
+      {
+        this->command = (command_nt - 143) + 191;
+        this->prgm_chg_instp(); //instr chang incr
+        return;
+      }
+      //*********************send control************************
+      this->midiStream->write(this->command); //2 bytes only to prgm chang******
+      this->midiStream->write(this->data2);   //***********************************
+
+      if (this->command != 192 && this->command > 0) // if not prg chang send third byte
+        this->midiStream->write(this->data3);
+      //***********************************************************
+    }
+  }
+}
 
 void MidiApplication::prgm_chg_instm()
 {
-  /*  if(command == 193) {
-  this->midiStream->write(177);
-  this->midiStream->write(0);
-  this->midiStream->write(11);
-  if(inst_2 > 1 )
-  inst_2 -=1;
-  inst = inst_2;  
-   }  
-  if(command == 192) {
-  this->midiStream->write(176);
-  this->midiStream->write(0);
-  this->midiStream->write(0); 
-  if(inst_1 > 1 )
-  inst_1 -=1;
-  inst = inst_1;   
-  }*/
+  // if (this->command == 193)
+  // {
+  //   this->midiStream->write(177);
+  //   this->midiStream->write(0);
+  //   this->midiStream->write(11);
+  //   if (this->inst_2 > 1)
+  //     this->inst_2 -= 1;
+  //   this->inst = this->inst_2;
+  // }
+  // if (this->command == 192)
+  // {
+  //   this->midiStream->write(176);
+  //   this->midiStream->write(0);
+  //   this->midiStream->write(0);
+  //   if (this->inst_1 > 1)
+  //     this->inst_1 -= 1;
+  //   this->inst = this->inst_1;
+  // }
 
-  if (Data3 != 0)
+  if (this->data3 != 0)
   {
-    if (inst > 1)
-      inst -= 1;
-    this->midiStream->write(command);
-    this->midiStream->write(inst);
+    if (this->inst > 1)
+    {
+      this->inst -= 1;
+    }
+    this->midiStream->write(this->command);
+    this->midiStream->write(this->inst);
   }
 }
 
 void MidiApplication::prgm_chg_instp()
 {
-  /* if(command == 193) {
-  this->midiStream->write(177);
-  this->midiStream->write(0);
-  this->midiStream->write(11);
-  if(inst_2 < 128 )
-  inst_2 +=1;  
-  inst = inst_2;  
-  }
-  
-  if(command == 192 ){
-  this->midiStream->write(176);
-  this->midiStream->write(0);
-  this->midiStream->write(0);
-  if(inst_1 < 128 )
-  inst_1 +=1;  
-  inst = inst_1;  
-  }*/
-
-  if (Data3 != 0)
+/*
+  if (this->command == 193)
   {
-    if (inst < 128)
-      inst += 1;
-    this->midiStream->write(command);
-    this->midiStream->write(inst);
+    this->midiStream->write(177);
+    this->midiStream->write(0);
+    this->midiStream->write(11);
+    if (this->inst_2 < 128)
+      this->inst_2 += 1;
+    this->inst = this->inst_2;
+  }
+
+  if (this->command == 192)
+  {
+    this->midiStream->write(176);
+    this->midiStream->write(0);
+    this->midiStream->write(0);
+    if (this->inst_1 < 128)
+      this->inst_1 += 1;
+    this->inst = this->inst_1;
+  }
+*/
+  if (this->data3 != 0)
+  {
+    if (this->inst < 128) {
+      this->inst += 1;
+    }
+    this->midiStream->write(this->command);
+    this->midiStream->write(this->inst);
   }
 }
 
 void MidiApplication::record()
 {
+  int command_nt = 144;
 
-  if (indxmid < 10000)
+  if (this->midiCodeIndex < MAX_NB_MIDI_CODES)
   {
-    if (Data2 != 96)
+    if (this->data2 != 96)
     {
-      if (st_rec == 1)
+      if (this->start_rec)
       {
-        st_rec = 0;
-        i_count = 0.;
+        this->start_rec = false;
+        this->i_count = 0.;
       }
-      if (command > 143 && command < 160)
-        command_nt = command;
-      if (flag_split == 1 && Data2 < 54 && command == 144)
+      if (this->command > 143 && this->command < 160)
+        command_nt = this->command;
+      if (this->flag_split && this->data2 < 54 && this->command == 144)
       {
-        command = 145;
+        this->command = 145;
       }
-      if (flag_split == 1 && Data2 < 54 && command == 128)
+      if (this->flag_split && this->data2 < 54 && this->command == 128)
       {
-        command = 129;
-      }
-
-      TimerMid[indxmid] = i_count;
-      commandmid[indxmid] = command;
-      data2mid[indxmid] = Data2;
-      data3mid[indxmid] = Data3;
-
-      if (flag_split == 1)
-      {
-        if (command == 129)
-          command = 128;
-        if (command == 145)
-          command = 144;
+        this->command = 129;
       }
 
-      if (Data2 == 37 && Data3 > 0 && rec_ok == 1)
-      {
-        data2mid[indxmid] = 98;
-        rec_ok = 0;
-        command = 128;
+      this->times[this->midiCodeIndex] = this->i_count;
+      this->commands[this->midiCodeIndex] = this->command;
+      this->data2s[this->midiCodeIndex] = this->data2;
+      this->data3s[this->midiCodeIndex] = this->data3;
 
-        play_ok = 1;
-        indxmid = 0;
-        i_count = 0.;
+      if (this->flag_split)
+      {
+        if (this->command == 129)
+          this->command = 128;
+        if (this->command == 145)
+          this->command = 144;
+      }
+
+      if (this->data2 == 37 && this->data3 > 0 && this->rec_ok)
+      {
+        this->data2s[this->midiCodeIndex] = 98;
+        this->rec_ok = false;
+        this->command = 128;
+
+        this->play_ok = true;
+        this->midiCodeIndex = 0;
+        this->i_count = 0.;
 
         //this->play();
       }
 
-      indxmid += 1;
+      this->midiCodeIndex += 1;
     }
   }
 }
 
 void MidiApplication::play()
 {
-  if (indxmid < 10000)
+  if (this->midiCodeIndex < MAX_NB_MIDI_CODES)
   {
-    if (i_count >= TimerMid[indxmid])
+    if (this->i_count >= this->times[this->midiCodeIndex])
     {
 
-      if (data2mid[indxmid] == 98)
+      if (this->data2s[this->midiCodeIndex] == 98)
       { //rebouclage
-        i_count = 0.;
-        indxmid = 0;
+        this->i_count = 0.;
+        this->midiCodeIndex = 0;
         return;
       }
 
-      this->midiStream->write(commandmid[indxmid]);
+      this->midiStream->write(this->commands[this->midiCodeIndex]);
 
-      this->midiStream->write(data2mid[indxmid]);
-      this->midiStream->write(data3mid[indxmid]);
+      this->midiStream->write(this->data2s[this->midiCodeIndex]);
+      this->midiStream->write(this->data3s[this->midiCodeIndex]);
 
-      indxmid += 1;
+      this->midiCodeIndex += 1;
     }
   }
   return;
@@ -348,103 +373,24 @@ void MidiApplication::play()
 void MidiApplication::split_kb()
 {
 
-  if (command == 128 && Data2 < 55)
-    command = 129;
-  //if (Data2 < 55)
-  if (command == 144 && Data2 < 55)
-    command = 145;
+  if (this->command == 128 && this->data2 < 55)
+    this->command = 129;
+  //if (this->data2 < 55)
+  if (this->command == 144 && this->data2 < 55)
+    this->command = 145;
 
-  if (command == 128 && Data2 > 55)
-    command = 128;
-  //if (Data2 < 55)
-  if (command == 144 && Data2 > 55)
-    command = 144;
+  if (this->command == 128 && this->data2 > 55)
+    this->command = 128;
+  //if (this->data2 < 55)
+  if (this->command == 144 && this->data2 > 55)
+    this->command = 144;
   return;
 }
 
-void MidiApplication::trsf_data_sd()
-{
-  int h = sizeof(TimerMid);
-  char linec[h];
-  // Initialize the SD.
-  if (!sd.begin(SD_CONFIG))
-  {
-    sd.initErrorHalt(&Serial);
-    return;
-  }
-  // Remove any existing file.
-  if (sd.exists("ReadCsvDemo.csv"))
-  {
-    sd.remove("ReadCsvDemo.csv");
-  }
-  // Create the file.
-  if (!file.open("ReadCsvDemo.csv", FILE_WRITE))
-  {
-    error("open failed");
-    exit;
-  }
-  file.rewind();
-  //************************transfert debute ici****************
-  //******************tab > sd card*****************************
-  for (int i = 0; i < sizeof(TimerMid) / sizeof(TimerMid[0]); i++)
-  {
-    file.println(TimerMid[i]); //timer
-    delay(2);
-    file.println(commandmid[i]); //timer
-    delay(2);
-    file.println(data2mid[i]); //timer
-    delay(2);
-    file.println(data3mid[i]); //timer
-    if (TimerMid[i + 1] == 0.)
-    {
-      file.println("f"); //timer
-      break;
-    }
-  }
 
-  /*  for (int i=0;i<sizeof(commandmid)/sizeof(commandmid[0]);i++) {
-    file.println(commandmid[i]);//statut
-    delay(5);
-    if(commandmid[i+1]== 0. ){
-    file.println("f");//timer
-    break;
-    } 
-   }
-
-    for (int i=0;i<sizeof(data2mid)/sizeof(data2mid[0]);i++) {
-    file.println(data2mid[i]);//note
-    delay(5);
-    if(data2mid[i+1]== 0. ){
-    file.println("f");//timer
-    break;
-    } 
-   }
-
-    for (int i=0;i<sizeof(data3mid)/sizeof(data3mid[0]);i++) {
-    file.println(data3mid[i]);//velocity
-    delay(5);
-    if(commandmid[i+1]== 0. ){
-    file.println("f");//timer
-    break;
-    } 
-   }*/
-
-  //*************************************************************
-  file.rewind(); //back file start
-  //*********************************
-  int j = 0;
-
-  while (file.available())
-  {
-    j++;
-    //***********sd card > tab********************************
-    linec[j] = file.read();
-    Serial.print(linec[j]);
-    if (linec[j - 1] > 0 && linec[j] == 0)
-      exit;
-  }
-  //******************************************************
-  file.close();
-  Serial.println(F("Done"));
-  return;
+void MidiApplication::setDisplayer(IDisplayer* displayer) {
+  this->displayer = displayer;
+}
+IDisplayer* MidiApplication::getDisplayer() {
+  return(this->displayer);
 }
