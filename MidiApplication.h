@@ -41,6 +41,7 @@ private:
     int command = 0;
     int data2 = 60;
     int data3 = 100;
+    int command_tampon = 144;
 
     int command_nt = 144; 
 
