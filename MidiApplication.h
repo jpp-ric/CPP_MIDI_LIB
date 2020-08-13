@@ -13,9 +13,9 @@ public:
 
     void handleMidiCode();
     void play();
-
+    
     void setDisplayer(IDisplayer* displayer);
-
+    void MidiApplication::contl_chg();   
     bool play_ok = false;
     bool rec_ok = false;    
     float i_count = 0.;
@@ -43,7 +43,9 @@ private:
     int data3 = 100;
     int command_tampon = 144;
 
-    int command_nt = 144; 
+    int command_nt = 144;
+    int command_ch = 14;
+    int ch_nt = 1;
 
     unsigned long midiCodeIndex = 0;
     bool start_rec = false;

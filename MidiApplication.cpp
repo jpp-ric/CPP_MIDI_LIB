@@ -1,7 +1,8 @@
 #include <MidiApplication.h>
 #include <IMidiStream.h>
 #include <IDisplayer.h>
-
+#include <iostream>
+#include <stdlib.h>
 MidiApplication::MidiApplication(IMidiStream *midiStream)
 {
   this->midiStream = midiStream;
@@ -14,24 +15,22 @@ IMidiStream *MidiApplication::getMidiStream()
 
 void MidiApplication::init()
 {
-  this->midiStream->write(192);
+  this->midiStream->write(176);
   this->midiStream->write(0);
   this->midiStream->write(0);
 
-  this->midiStream->write(193);
-  this->midiStream->write(0);
+  this->midiStream->write(192);
+  this->midiStream->write(5);
+
+  this->midiStream->write(201);
   this->midiStream->write(1);
 
   this->midiStream->write(193);
-  this->midiStream->write(33);
+  this->midiStream->write(34);
 
-  this->midiStream->write(196);
-  this->midiStream->write(0);
-  this->midiStream->write(0);
-
-  this->midiStream->write(199);
-  this->midiStream->write(0);
-  this->midiStream->write(0);
+  this->midiStream->write(185);
+  this->midiStream->write(7);
+  this->midiStream->write(90);
 
   this->midiStream->write(183);
   this->midiStream->write(7);
@@ -89,9 +88,20 @@ void MidiApplication::handleMidiCode()
   }
   //***********************note on/off******************************************************
 
-  if (this->command < 160 && this->command > 0)
-  {
+  if (this->command < 160 && this->command > 127)
+  { 
+    //*******get statut***exempl:note on = 14/15********* 
+    this->command_ch = this->command;
+    this->command_ch = abs(this->command_ch/10); 
+    //**********************************************
+    this->getDisplayer()->display(this->command);
+    //********get chanel**************************
+    if(this->command_ch == 14 || this->command_ch == 15 )
+    this->ch_nt = this->command - 143;
+    //********************************************
+
     
+    this->getDisplayer()->display(this->ch_nt);
     //*********switch off split if not ch 1*********************
     if (this->command > 144 ) 
     {
@@ -99,34 +109,31 @@ void MidiApplication::handleMidiCode()
       this->flag_split = false; //on
       this->switch_split = false;
     }
-    //**********************************************************
-    
+    //****************check flag_split********************************
+       
     if ((this->command == 144 || this->command == 128) && this->flag_split)
     {
       this->command_tampon = this->command; //save command used in split_kb
 
       this->split_kb(); //split keyboard
     }
-
+//****************************************************************
     //************realtime send midi code***********************
-    //this->getDisplayer()->display(this->command);
-    //this->getDisplayer()->display(this->data2);
-    //this->getDisplayer()->display(this->data3);
-    //  this->getDisplayer()->display(this->flag);
-    //  this->getDisplayer()->display("\r\n");
+    
     this->midiStream->write(this->command);
     this->midiStream->write(this->data2);
     this->midiStream->write(this->data3);
-    //*********************call rec object***************************
+
+    //*************check switch rec object***************************
 
     if (this->rec_ok)
     {
-      this->record();
+      this->record();//call rec object
     }
 
-    //**********************************************************
+    //*******************save command ***************************************
     if ((this->command_tampon == 144 || this->command_tampon == 128) && this->flag_split)
-      this->command = this->command_tampon; //get initial command before split
+      this->command = this->command_tampon; //get initial command before go to split
     //return;
     //********************switch this->rec_ok note 96**************
 
@@ -146,6 +153,8 @@ void MidiApplication::handleMidiCode()
   //****************************control********************
   if (this->command > 159 && this->command < 253)
   {
+    if(this->command == 176 && this->data3 == 0)//only command "on" 
+    return;
     //*********************flag split"on"***************
     if (this->data2 == 19 && this->data3 > 0 && !this->switch_split)
     {
@@ -168,7 +177,7 @@ void MidiApplication::handleMidiCode()
     //********************stop all ch*****************************
     if (this->data2 == 14 && this->data3 > 0)
     {
-      for (int i = 1; i < 17; i++)
+      for (int i = 1; i < 17; i++)//set off all ch
       {
         this->midiStream->write(175 + i);
         this->midiStream->write(123);
@@ -176,7 +185,7 @@ void MidiApplication::handleMidiCode()
       }
       this->play_ok = false;
       this->rec_ok = false;
-      this->data2 = 200;
+      this->data2 = 127;
     }
     //******************data send to sd card*********************************************
     if (this->data2 == 10 && this->data3 > 0)
@@ -196,37 +205,43 @@ void MidiApplication::handleMidiCode()
     }
     //**************************************************
     //**********************control level****************************
-    if (this->data2 == 1)
+    if (this->data2 == 1 && this->data3 > 0 )
     {
       this->data2 = 7; //level
-      this->command = (this->command_nt - 143) + 175;
+      this->command = this->ch_nt + 175;
+      this->contl_chg();
     }
     //************************control reverb*************************
-    if (this->data2 == 2)
+    else if (this->data2 == 2 && this->data3 > 0 )
     {
       this->data2 = 91; //reverb
-      this->command = (this->command_nt - 143) + 175;
+      this->command = this->ch_nt + 175;
+      this->contl_chg();
     }
     //************************instr chang********************
-    else if (this->data2 == 11)
+    else if (this->data2 == 11 && this->data3 > 0 )
     {
-      this->command = (this->command_nt - 143) + 191;
+
+      this->command = this->ch_nt + 191;
       this->prgm_chg_instm(); //instr chang decr
-      return;
+      //return;
     }
-    else if (this->data2 == 12)
+    else if (this->data2 == 12 && this->data3 > 0)
     {
-      this->command = (this->command_nt - 143) + 191;
+      this->command = this->ch_nt + 191;
       this->prgm_chg_instp(); //instr chang incr
-      return;
+      //return;
     }
+    //this->getDisplayer()->display(this->command);
     //*********************send prg chg************************
-    this->midiStream->write(this->command); //2 bytes only to prgm chang******
+   /* this->midiStream->write(this->command); //2 bytes only to prgm chang******
     this->midiStream->write(this->data2);   //***********************************
 
-    if (this->command != 192 && this->command > 0) // if not prg chang send third byte
+    if (this->command_ch != 19 && this->command > 0) // if not prg chang send third byte
       this->midiStream->write(this->data3);
     //***********************************************************
+    */
+    return;
   }
   //}
 }
@@ -240,7 +255,14 @@ void MidiApplication::prgm_chg_instm()
     {
       this->inst -= 1;
     }
+    //this->midiStream->write(192);
+    //this->midiStream->write(0);
+    //this->midiStream->write(0);
+    this->getDisplayer()->display(this->inst);
+    this->getDisplayer()->display(this->command);
+    this->getDisplayer()->display("moins");
     this->midiStream->write(this->command);
+    //for(int d = 0;d<10;d++);
     this->midiStream->write(this->inst);
   }
 }
@@ -254,8 +276,17 @@ void MidiApplication::prgm_chg_instp()
     {
       this->inst += 1;
     }
+    //this->midiStream->write(192);
+    //this->midiStream->write(0);
+    //this->midiStream->write(0);
+   this->getDisplayer()->display(this->inst);
+    this->getDisplayer()->display(this->command);
+    this->getDisplayer()->display("plus");
+
     this->midiStream->write(this->command);
+    //for(int d = 0;d<10;d++);
     this->midiStream->write(this->inst);
+
   }
 }
 //**************************record****************************************
@@ -333,17 +364,14 @@ void MidiApplication::split_kb()
   {
     if (this->data2 <= 54)
     {
-      this->command = this->command + 1;
-      //Serial.println("split");
-      return;
-    }
-    else
-    {
+      if(this->command == 144)
+      this->command = 145;//this->command + 1;
 
-      //this->command=this->command_tampon;
+      if(this->command == 128)
+      this->command = 129;//this->command + 1;
+      
       return;
     }
-    //this->command=this->command_tampon;
     return;
   }
 }
@@ -356,4 +384,16 @@ void MidiApplication::setDisplayer(IDisplayer *displayer)
 IDisplayer *MidiApplication::getDisplayer()
 {
   return (this->displayer);
+}
+void MidiApplication::contl_chg()
+{
+//this->getDisplayer()->display(this->command);
+    //*********************send contl chg************************
+    this->midiStream->write(this->command); //2 bytes only to prgm chang******
+    this->midiStream->write(this->data2);   //***********************************
+
+    //if (this->command_ch != 19 && this->command > 0) // if not prg chang send third byte
+      this->midiStream->write(this->data3);
+    //***********************************************************
+    return;
 }
