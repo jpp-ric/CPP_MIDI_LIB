@@ -25,11 +25,13 @@ public:
     bool play_2_ok = false;
     bool flag_play_1 = false;
     bool Play_1 = false;
+    bool data_trk_1 = false;
     bool flag_play_2 = false;
 
     bool start_rec_1 = false;
+    bool start_rec_2 = false;
     bool data_rec_2_ok = false;
-    bool rec_ok_1 = false;
+    bool rec_1_ok = false;
     bool rec_2_ok =false;    
     float i_count = 0.;
     float i_count_2 = 0.;
@@ -39,10 +41,10 @@ public:
     unsigned long midiCodeIndex_2 = 0;
     volatile unsigned long Ticks = 0; // use volatile for shared variables
 
-    float time_1s[MAX_NB_TIMES];
-    int command_1s[MAX_NB_MIDI_CODES];
-    int data3_1s[MAX_NB_MIDI_CODES];
-    int data2_1s[MAX_NB_MIDI_CODES];
+    float time1s[MAX_NB_TIMES];
+    int command1s[MAX_NB_MIDI_CODES];
+    int data31s[MAX_NB_MIDI_CODES];
+    int data21s[MAX_NB_MIDI_CODES];
 
     float time2s[MAX_NB_TIMES];
     int command2s[MAX_NB_MIDI_CODES];
