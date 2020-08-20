@@ -1,9 +1,12 @@
-#include "MidiApplication.h"
-#include <IMidiStream.h>
-#include <IDisplayer.h>
-#include "Track.h"
 #include <iostream>
 #include <stdlib.h>
+
+#include <MidiApplication.h>
+#include <IMidiStream.h>
+#include <IDisplayer.h>
+#include <Track.h>
+#include <MidiCodeHandler.h>
+
 
 MidiApplication::MidiApplication(IMidiStream* midiStream)
 {
@@ -73,11 +76,11 @@ void MidiApplication::handleMidiCode()
   //***********************************************************************************
   if (data > 253)
   {
-    return; // other MIDI this->command
+    return; // other MIDI command
   }
 
   //************************* midi command **********************************************
-  else if (data >= COMMAND_NOTE_OFF_FIRST_CANAL && data < 254)
+  else if (data >= MIDI_COMMAND_NOTE_OFF_FIRST_CANAL && data < 254)
   {
     this->command = data;
     // this->getDisplayer()->display(this->command);
@@ -140,27 +143,27 @@ void MidiApplication::handleMidiCode()
 
 bool MidiApplication::isNoteOnOrOffCommandChannel1(int command)
 {
-  return (command == COMMAND_NOTE_ON_FIRST_CANAL || command == COMMAND_NOTE_OFF_FIRST_CANAL);
+  return (command == MIDI_COMMAND_NOTE_ON_FIRST_CANAL || command == MIDI_COMMAND_NOTE_OFF_FIRST_CANAL);
 }
 
 bool MidiApplication::isNoteOffCommand() 
 {
-  return(this->command>=COMMAND_NOTE_OFF_FIRST_CANAL && this->command<=COMMAND_NOTE_OFF_LAST_CANAL);
+  return(this->command>=MIDI_COMMAND_NOTE_OFF_FIRST_CANAL && this->command<=MIDI_COMMAND_NOTE_OFF_LAST_CANAL);
 }
 
 bool MidiApplication::isNoteOnCommand() 
 {
-  return(this->command>=COMMAND_NOTE_ON_FIRST_CANAL && this->command<=COMMAND_NOTE_ON_LAST_CANAL);
+  return(this->command>=MIDI_COMMAND_NOTE_ON_FIRST_CANAL && this->command<=MIDI_COMMAND_NOTE_ON_LAST_CANAL);
 }
 
 bool MidiApplication::isControlChangeCommand() 
 {
-  return(this->command>=COMMAND_CONTROL_CHANGE_FIRST_CANAL && this->command<=COMMAND_CONTROL_CHANGE_LAST_CANAL);
+  return(this->command>=MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL && this->command<=MIDI_COMMAND_CONTROL_CHANGE_LAST_CANAL);
 }
 
-bool MidiApplication::isInstrumentChangeCommand() 
+bool MidiApplication::isProgramChangeCommand() 
 {
-  return(this->command>=COMMAND_INSTRUM_CHANGE_FIRST_CANAL && this->command<=COMMAND_INSTRUM_CHANGE_LAST_CANAL);
+  return(this->command>=MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL && this->command<=MIDI_COMMAND_PROGRAM_CHANGE_LAST_CANAL);
 }
 
 //*****************************************************************************
@@ -168,19 +171,19 @@ bool MidiApplication::isInstrumentChangeCommand()
 
 int MidiApplication::getNoteOffCommandForChannel(int channel)
 {
-  return(COMMAND_NOTE_OFF_FIRST_CANAL + channel-1);
+  return(MIDI_COMMAND_NOTE_OFF_FIRST_CANAL + channel-1);
 }
 int MidiApplication::getNoteOnCommandForChannel(int channel)
 {
-  return(COMMAND_NOTE_ON_FIRST_CANAL + channel-1);  
+  return(MIDI_COMMAND_NOTE_ON_FIRST_CANAL + channel-1);  
 }
 int MidiApplication::getControlChangeCommandForChannel(int channel)
 {
-  return(COMMAND_CONTROL_CHANGE_FIRST_CANAL + channel-1);  
+  return(MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL + channel-1);  
 }
-int MidiApplication::getInstrumentChangeCommandForChannel(int channel)
+int MidiApplication::getProgramChangeCommandForChannel(int channel)
 {
-  return(COMMAND_INSTRUM_CHANGE_FIRST_CANAL + channel-1);  
+  return(MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL + channel-1);  
 }
 
 //Calcule la valeur du canal, à partir de this->command,
@@ -191,19 +194,19 @@ void MidiApplication::setCommandChannel()
 
   if (this->isNoteOffCommand()) 
   {
-    channel1Command = COMMAND_NOTE_OFF_FIRST_CANAL;
+    channel1Command = MIDI_COMMAND_NOTE_OFF_FIRST_CANAL;
   }
   else if (this->isNoteOnCommand()) 
   {
-    channel1Command = COMMAND_NOTE_ON_FIRST_CANAL;
+    channel1Command = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
   }  
   else if (this->isControlChangeCommand()) 
   {
-    channel1Command = COMMAND_CONTROL_CHANGE_FIRST_CANAL;
+    channel1Command = MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL;
   }
-  else if (this->isInstrumentChangeCommand()) 
+  else if (this->isProgramChangeCommand()) 
   {
-    channel1Command = COMMAND_INSTRUM_CHANGE_FIRST_CANAL;
+    channel1Command = MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL;
   }
   else 
   {
@@ -229,7 +232,7 @@ void MidiApplication::setCommandChannel()
 
 void MidiApplication::sendCurrentMidiCommand()
 {
-  if (this->isInstrumentChangeCommand()) 
+  if (this->isProgramChangeCommand()) 
   {
     this->sendMidiCommand(this->command, this->data2);
   }
@@ -247,7 +250,7 @@ void MidiApplication::sendMidiCommand(int command, int data2, int data3)
     this->midiStream->write(command);
     this->midiStream->write(data2);
 
-    if (data3!=DATA3_UNDEFINED_VALUE) //Envoi data3 que si reçu en paramètre.
+    if (data3!=UNDEFINED_MIDI_CODE) //Envoi data3 que si reçu en paramètre.
     {
       this->midiStream->write(data3);
     }
@@ -265,7 +268,7 @@ void MidiApplication::sendMidiCommand(int command, int data2, int data3)
 void MidiApplication::handleNoteOnOffCommand() 
 {
   //*********switch off split if not ch 1*****************
-  if (this->command > COMMAND_NOTE_ON_FIRST_CANAL)
+  if (this->command > MIDI_COMMAND_NOTE_ON_FIRST_CANAL)
   {
     this->flag_split = false; //on
     this->switch_split = false;
@@ -338,7 +341,7 @@ void MidiApplication::handleControlCommand()
     this->handleControlChangeCommand();
   }
 
-  else if (this->isInstrumentChangeCommand()) // Instrument change
+  else if (this->isProgramChangeCommand()) // Instrument change
   {
 
   }
@@ -413,13 +416,13 @@ void MidiApplication::handleControlChangeCommand()
 
     else if (this->data2 == 11) // ************* Instrum. change - ************* 
     {
-      this->command = this->getInstrumentChangeCommandForChannel(this->commandChannel);
+      this->command = this->getProgramChangeCommandForChannel(this->commandChannel);
       //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       this->prgm_chg_instm(); //instr chang decr
     }
     else if (this->data2 == 12) // ************* Instrum. change + *************
     {
-      this->command = this->getInstrumentChangeCommandForChannel(this->commandChannel);
+      this->command = this->getProgramChangeCommandForChannel(this->commandChannel);
       //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       this->prgm_chg_instp(); //instr chang incr
     }                       
@@ -531,13 +534,13 @@ void MidiApplication::prgm_chg_instm()
 {
   if (this->data3 != 0)
   {
-    if (this->inst > 1)
+    if (this->inst > 0)
     {
       this->inst -= 1;
     }
 
     //this->getDisplayer()->display("moins");
-    this->sendInstrumentChange();
+    this->sendProgramChange();
   }
 }
 //****************prg chg increment**************************
@@ -551,12 +554,12 @@ void MidiApplication::prgm_chg_instp()
     }
 
     // this->getDisplayer()->display("plus");
-    this->sendInstrumentChange();
+    this->sendProgramChange();
 
   }
 }
 
-void MidiApplication::sendInstrumentChange() 
+void MidiApplication::sendProgramChange() 
 {
   this->sendMidiCommand(this->command, this->inst);
 }

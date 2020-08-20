@@ -1,22 +1,12 @@
 #include <IMidiStream.h>
 #include <IDisplayer.h>
 #include <Track.h>
+#include <MidiCodeHandler.h>
 
 #define MAX_NB_MIDI_CODES 3000
 #define MAX_NB_TIMES MAX_NB_MIDI_CODES
 #define NB_RUNNING_NOTES 100
 
-#define DATA3_UNDEFINED_VALUE -1
-
-#define NB_CHANNELS 16
-#define COMMAND_NOTE_OFF_FIRST_CANAL 128
-#define COMMAND_NOTE_OFF_LAST_CANAL COMMAND_NOTE_OFF_FIRST_CANAL + NB_CHANNELS - 1
-#define COMMAND_NOTE_ON_FIRST_CANAL 144
-#define COMMAND_NOTE_ON_LAST_CANAL COMMAND_NOTE_ON_FIRST_CANAL + NB_CHANNELS - 1
-#define COMMAND_CONTROL_CHANGE_FIRST_CANAL 176
-#define COMMAND_CONTROL_CHANGE_LAST_CANAL COMMAND_CONTROL_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
-#define COMMAND_INSTRUM_CHANGE_FIRST_CANAL 192
-#define COMMAND_INSTRUM_CHANGE_LAST_CANAL COMMAND_INSTRUM_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
 
 class MidiApplication
 {
@@ -97,17 +87,17 @@ private:
     int getNoteOffCommandForChannel(int channel);
     int getNoteOnCommandForChannel(int channel);
     int getControlChangeCommandForChannel(int channel);
-    int getInstrumentChangeCommandForChannel(int channel);
+    int getProgramChangeCommandForChannel(int channel);
 
     bool isNoteOffCommand();
     bool isNoteOnCommand();
     bool isControlChangeCommand();
-    bool isInstrumentChangeCommand();
+    bool isProgramChangeCommand();
 
     void sendCurrentMidiCommand();
-    void sendMidiCommand(int command, int data2, int data3 = DATA3_UNDEFINED_VALUE);
+    void sendMidiCommand(int command, int data2, int data3 = UNDEFINED_MIDI_CODE);
     void sendPitchBend();
-    void sendInstrumentChange();
+    void sendProgramChange();
 
     void handleNoteOnOffCommand();
     void handleControlCommand();
@@ -131,9 +121,9 @@ private:
     int command = 0;
     int data2 = 60;
     int data3 = 100;
-    int command_tampon = COMMAND_NOTE_ON_FIRST_CANAL;
+    int command_tampon = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
 
-    int command_nt = COMMAND_NOTE_ON_FIRST_CANAL;
+    int command_nt = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
     // int commandRange = 14;
     int commandChannel = 1;
 
