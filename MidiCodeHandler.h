@@ -4,20 +4,15 @@
 #include <MidiMessage.h>
 
 
-#define MIDI_COMMAND_NOTE_OFF_FIRST_CANAL 128
-#define MIDI_COMMAND_NOTE_ON_FIRST_CANAL 144
-#define MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL 176
-#define MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL 192
-
 #define NB_CHANNELS 16
-#define MIDI_COMMAND_NOTE_OFF_LAST_CANAL MIDI_COMMAND_NOTE_OFF_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_COMMAND_NOTE_ON_LAST_CANAL MIDI_COMMAND_NOTE_ON_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_COMMAND_CONTROL_CHANGE_LAST_CANAL MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_COMMAND_PROGRAM_CHANGE_LAST_CANAL MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
+#define MIDI_STATUS_NOTE_OFF_LAST_CANAL MIDI_STATUS_NOTE_OFF_FIRST_CANAL + NB_CHANNELS - 1
+#define MIDI_STATUS_NOTE_ON_LAST_CANAL MIDI_STATUS_NOTE_ON_FIRST_CANAL + NB_CHANNELS - 1
+#define MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
+#define MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
 
-#define MIDI_COMMAND_FIRST MIDI_COMMAND_NOTE_OFF_FIRST_CANAL
+#define MIDI_STATUS_FIRST MIDI_STATUS_NOTE_OFF_FIRST_CANAL
 
-#define UNDEFINED_MIDI_CODE -999
+
 
 
 
@@ -46,11 +41,11 @@ private:
 
     void destroyMidiMessage();
 
-    bool isMidiCommand(int midiCode);
-    bool isNoteOnMidiCommand(int midiCode);
-    bool isNoteOffMidiCommand(int midiCode);
-    bool isControlChangeMidiCommand(int midiCode);
-    bool isProgramChangeMidiCommand(int midiCode);
+    bool isMidiStatus(int midiCode);
+    bool isNoteOnMidiStatus(int midiCode);
+    bool isNoteOffMidiStatus(int midiCode);
+    bool isControlChangeMidiStatus(int midiCode);
+    bool isProgramChangeMidiStatus(int midiCode);
 
     void addMidiCodeToMidiMessage(int midiCode);
 

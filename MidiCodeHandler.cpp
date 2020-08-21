@@ -10,24 +10,24 @@ MidiCodeHandler::~MidiCodeHandler() {
 
 void MidiCodeHandler::handleMidiCode(int midiCode)
 {
-    if (this->isMidiCommand(midiCode))
+    if (this->isMidiStatus(midiCode))
     {
-        if (this->isNoteOnMidiCommand(midiCode))
+        if (this->isNoteOnMidiStatus(midiCode))
         {
             this->destroyMidiMessage();
             this->midiMessage = this->createNoteOnMidiMessage(midiCode);
         }
-        else if (this->isNoteOffMidiCommand(midiCode))
+        else if (this->isNoteOffMidiStatus(midiCode))
         {
             this->destroyMidiMessage();
             this->midiMessage = this->createNoteOffMidiMessage(midiCode);
         }
-        else if (this->isControlChangeMidiCommand(midiCode))
+        else if (this->isControlChangeMidiStatus(midiCode))
         {
             this->destroyMidiMessage();
             this->midiMessage = this->createControlChangeMidiMessage(midiCode);
         }
-        else if (this->isProgramChangeMidiCommand(midiCode))
+        else if (this->isProgramChangeMidiStatus(midiCode))
         {
             this->destroyMidiMessage();
             this->midiMessage = this->createProgramChangeMidiMessage(midiCode);
@@ -72,29 +72,29 @@ void MidiCodeHandler::destroyMidiMessage()
 
 //********************************************
 
-bool MidiCodeHandler::isMidiCommand(int midiCode)
+bool MidiCodeHandler::isMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_COMMAND_FIRST);
+    return(midiCode>=MIDI_STATUS_FIRST);
 }
 
-bool MidiCodeHandler::isNoteOnMidiCommand(int midiCode)
+bool MidiCodeHandler::isNoteOnMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_COMMAND_NOTE_ON_FIRST_CANAL && midiCode<=MIDI_COMMAND_NOTE_ON_LAST_CANAL);
+    return(midiCode>=MIDI_STATUS_NOTE_ON_FIRST_CANAL && midiCode<=MIDI_STATUS_NOTE_ON_LAST_CANAL);
 }
 
-bool MidiCodeHandler::isNoteOffMidiCommand(int midiCode)
+bool MidiCodeHandler::isNoteOffMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_COMMAND_NOTE_OFF_FIRST_CANAL && midiCode<=MIDI_COMMAND_NOTE_OFF_LAST_CANAL);
+    return(midiCode>=MIDI_STATUS_NOTE_OFF_FIRST_CANAL && midiCode<=MIDI_STATUS_NOTE_OFF_LAST_CANAL);
 }
 
-bool MidiCodeHandler::isControlChangeMidiCommand(int midiCode)
+bool MidiCodeHandler::isControlChangeMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL && midiCode<=MIDI_COMMAND_CONTROL_CHANGE_LAST_CANAL);
+    return(midiCode>=MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL && midiCode<=MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL);
 }
 
-bool MidiCodeHandler::isProgramChangeMidiCommand(int midiCode)
+bool MidiCodeHandler::isProgramChangeMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL && midiCode<=MIDI_COMMAND_PROGRAM_CHANGE_LAST_CANAL);
+    return(midiCode>=MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL && midiCode<=MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL);
 }
 
 //********************************************
