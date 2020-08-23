@@ -4,16 +4,8 @@
 #include <MidiMessage.h>
 
 
-#define NB_CHANNELS 16
-#define MIDI_STATUS_NOTE_OFF_LAST_CANAL MIDI_STATUS_NOTE_OFF_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_STATUS_NOTE_ON_LAST_CANAL MIDI_STATUS_NOTE_ON_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
-#define MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
-
 #define MIDI_STATUS_FIRST MIDI_STATUS_NOTE_OFF_FIRST_CANAL
-
-
-
+#define IDLE_MIDI_STATUS 254
 
 
 class MidiCodeHandler
@@ -26,7 +18,6 @@ public:
 
     void handleMidiCode(int midiCode);
 
-    bool isMidiMessageComplete();
     MidiMessage* getMidiMessage();
     
     //--- Déclaration des membres public --- (à éviter)
@@ -34,20 +25,17 @@ public:
 private:
 
     //--- Déclaration des Méthodes private ---
-    MidiMessage* createNoteOnMidiMessage(int midiCode);
-    MidiMessage* createNoteOffMidiMessage(int midiCode);
-    MidiMessage* createControlChangeMidiMessage(int midiCode);
-    MidiMessage* createProgramChangeMidiMessage(int midiCode);    
+    MidiMessage* createMidiMessageNoteOn();
+    MidiMessage* createMidiMessageNoteOff();
+    MidiMessage* createMidiMessageControlChange();
+    MidiMessage* createMidiMessageProgramChange();    
 
     void destroyMidiMessage();
 
-    bool isMidiStatus(int midiCode);
-    bool isNoteOnMidiStatus(int midiCode);
-    bool isNoteOffMidiStatus(int midiCode);
-    bool isControlChangeMidiStatus(int midiCode);
-    bool isProgramChangeMidiStatus(int midiCode);
+    static bool isMidiStatus(int midiCode);
+    static bool isMidiData(int midiCode);
 
-    void addMidiCodeToMidiMessage(int midiCode);
+    void addMidiDataToMidiMessage(int midiData);
 
 
     //--- Déclaration des membres private ---

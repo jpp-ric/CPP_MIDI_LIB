@@ -1,10 +1,12 @@
 #include <IMidiStream.h>
 #include <IDisplayer.h>
 #include <Track.h>
-#include <MidiCodeHandler.h>
 
-#define MAX_NB_MIDI_CODES 3000
-#define MAX_NB_TIMES MAX_NB_MIDI_CODES
+#include <MidiCodeHandler.h>
+#include <MidiMessageNoteOn.h>
+
+#define MAX_NB_MIDI_MESSAGES 3000
+#define MAX_NB_TIMES MAX_NB_MIDI_MESSAGES
 #define NB_RUNNING_NOTES 100
 
 
@@ -34,12 +36,12 @@ public:
     bool play_loop = false;
     bool play_1ok = false;
 
+    bool play_1_ok = false;
     bool play_2_ok = false;
     bool play_3_ok = false;
     bool flag_play_1 = false;
     bool flag_play_2 = false;
     bool flag_play_3 = false;
-    bool Play_1 = false;
     bool data_trk_1 = false;
     bool data_trk_2 = false;
     bool data_trk_3 = false;
@@ -61,27 +63,26 @@ public:
     volatile unsigned long Ticks = 0; // use volatile for shared variables
 
     float time1s[MAX_NB_TIMES];
-    int command1s[MAX_NB_MIDI_CODES];
-    int data31s[MAX_NB_MIDI_CODES];
-    int data21s[MAX_NB_MIDI_CODES];
+    int command1s[MAX_NB_MIDI_MESSAGES];
+    int data31s[MAX_NB_MIDI_MESSAGES];
+    int data21s[MAX_NB_MIDI_MESSAGES];
 
     float time2s[MAX_NB_TIMES];
-    int command2s[MAX_NB_MIDI_CODES];
-    int data32s[MAX_NB_MIDI_CODES];
-    int data22s[MAX_NB_MIDI_CODES];
+    int command2s[MAX_NB_MIDI_MESSAGES];
+    int data32s[MAX_NB_MIDI_MESSAGES];
+    int data22s[MAX_NB_MIDI_MESSAGES];
     int note_runing_tr2[NB_RUNNING_NOTES];
 
     float time3s[MAX_NB_TIMES];
-    int command3s[MAX_NB_MIDI_CODES];
-    int data33s[MAX_NB_MIDI_CODES];
-    int data23s[MAX_NB_MIDI_CODES];
+    int command3s[MAX_NB_MIDI_MESSAGES];
+    int data33s[MAX_NB_MIDI_MESSAGES];
+    int data23s[MAX_NB_MIDI_MESSAGES];
 
 private:
     //--- Déclaration des Méthodes private ---
     IDisplayer *getDisplayer();
     int getMidiStreamCurrentMidiCode();
     bool isNoteOnOrOffCommandChannel1(int command);
-    // void setCommandRange();
     void setCommandChannel();
 
     int getNoteOffCommandForChannel(int channel);
@@ -90,12 +91,13 @@ private:
     int getProgramChangeCommandForChannel(int channel);
 
     bool isNoteOffCommand();
+    bool isNoteOffCommand(int command);
     bool isNoteOnCommand();
     bool isControlChangeCommand();
     bool isProgramChangeCommand();
 
-    void sendCurrentMidiCommand();
-    void sendMidiCommand(int command, int data2, int data3 = UNDEFINED_MIDI_CODE);
+    void sendCurrentMidiMessage();
+    void sendMidiMessage(int command, int data2, int data3 = UNDEFINED_MIDI_CODE);
     void sendPitchBend();
     void sendProgramChange();
 
@@ -114,17 +116,16 @@ private:
     void turn_off_nt_trk2();
 
     //--- Déclaration des Membres private ---
-    // Track* track = 0;
+    Track* track = 0;
     IMidiStream* midiStream = 0;
     IDisplayer* displayer = 0;
 
     int command = 0;
     int data2 = 60;
     int data3 = 100;
-    int command_tampon = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
+    int command_tampon = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
 
-    int command_nt = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
-    // int commandRange = 14;
+    int command_nt = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
     int commandChannel = 1;
 
     bool start_rec = false;

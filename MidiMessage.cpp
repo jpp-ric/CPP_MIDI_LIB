@@ -1,7 +1,16 @@
 #include <MidiMessage.h>
 
-MidiMessage::MidiMessage() {
-    this->clearMidiCodes();
+MidiMessage::MidiMessage(int midiStatus, int data1, int data2) {
+    if (midiStatus!=UNDEFINED_MIDI_CODE) 
+    {
+        this->setMidiStatus(midiStatus);
+    }
+    if (data1!=UNDEFINED_MIDI_CODE) {
+        this->setMidiData1(data1);
+    }
+    if (data2!=UNDEFINED_MIDI_CODE) {
+        this->setMidiData2(data2);
+    }    
 }
 
 MidiMessage::~MidiMessage() {
@@ -10,17 +19,33 @@ MidiMessage::~MidiMessage() {
 
 //==========================================================
 
-
 char MidiMessage::getChannel()
 {
-    char channel = this->getMidiStatus() - this->getFirstCanalMidiStatus() +1;
+    char channel = this->getChannelForMidiStatus( this->getMidiStatus() );
+    return(channel);
+}
+
+void MidiMessage::setChannel(char channel)
+{
+    int midiStatus = this->getMidiStatusForChannel(channel);
+    this->setMidiStatus(midiStatus);
+}
+
+int MidiMessage::getMidiStatusForChannel(char channel)
+{
+    int midiStatus = this->getFirstCanalMidiStatus() + channel -1;
+    return(midiStatus);
+}
+char MidiMessage::getChannelForMidiStatus(int midiStatus)
+{
+    char channel = midiStatus - this->getFirstCanalMidiStatus() +1;
     return(channel);
 }
 
 bool MidiMessage::isComplete() 
 {
     int iNbMidiCodes = this->getNbMidiCodes();
-    return( ( iNbMidiCodes == this->getMaxNbMidiCodes()) ||  (iNbMidiCodes == MAX_NB_MIDI_CODES) );
+    return( (iNbMidiCodes == MAX_NB_MIDI_CODES) ||  (iNbMidiCodes == this->getMaxNbMidiCodes()) );
 }
 
 //============================================================
@@ -29,7 +54,7 @@ void MidiMessage::addMidiCode(int midiCode)
 {
     if (!this->isComplete()) 
     {
-        this->midiCodes[this->getNbMidiCodes()] = midiCode;
+        this->midiCodes[ this->getNbMidiCodes() ] = midiCode;
     }
 }
 

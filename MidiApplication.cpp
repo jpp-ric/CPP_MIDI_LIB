@@ -5,19 +5,24 @@
 #include <IMidiStream.h>
 #include <IDisplayer.h>
 #include <Track.h>
+
 #include <MidiCodeHandler.h>
+#include <MidiMessageNoteOn.h>
+#include <MidiMessageNoteOff.h>
+#include <MidiMessageControlChange.h>
+#include <MidiMessageProgramChange.h>
 
 
 MidiApplication::MidiApplication(IMidiStream* midiStream)
 {
   this->midiStream = midiStream;
 
-  // this->track = new Track();
+  this->track = new Track();
 }
 
 MidiApplication::~MidiApplication()
 {
-  // delete this->track; this->track = 0; //<<< décommenter si marche pas mieux
+  delete this->track; this->track = 0;
 }
 
 IMidiStream* MidiApplication::getMidiStream()
@@ -36,7 +41,7 @@ int MidiApplication::getMidiStreamCurrentMidiCode()
 void MidiApplication::setDisplayer(IDisplayer* displayer)
 {
   this->displayer = displayer;
-  // this->track->setDisplayer(displayer);
+  this->track->setDisplayer(displayer);
 }
 IDisplayer* MidiApplication::getDisplayer()
 {
@@ -47,23 +52,19 @@ IDisplayer* MidiApplication::getDisplayer()
 
 void MidiApplication::init()
 {
-  this->sendMidiCommand(176, 0, 0); //command, data2, data3
+  this->sendMidiMessage(176, 0, 0); //command, data2, data3
+  
+  this->sendMidiMessage(192, 5); //command, data2
 
-  this->sendMidiCommand(192, 5); //command, data2
+  this->sendMidiMessage(201, 1);
 
-  this->sendMidiCommand(201, 1);
+  this->sendMidiMessage(193, 34);
 
-  this->sendMidiCommand(193, 34);
-
-  this->sendMidiCommand(185, 7, 90);
-  this->sendMidiCommand(183, 7, 90);
-
-  this->sendMidiCommand(176, 7, 90);
-  this->sendMidiCommand(177, 7, 90);
-  this->sendMidiCommand(180, 7, 90);
-
-  // int leZz = this->track->telleMethodeDeLaClasseTrack();
-  // int leZzAutre = this->track->telleMembreDeLaClasseTrack;  
+  this->sendMidiMessage(176, 7, 90);
+  this->sendMidiMessage(177, 7, 90);
+  this->sendMidiMessage(180, 7, 90);
+  this->sendMidiMessage(183, 7, 90);  
+  this->sendMidiMessage(185, 7, 90);
 
 }
 
@@ -71,7 +72,9 @@ void MidiApplication::handleMidiCode()
 {
   int data = this->getMidiStreamCurrentMidiCode();
 
-  this->getDisplayer()->display(data);
+  // this->getDisplayer()->display(data);
+  
+  // int leZz = this->track->telleMethodeDeLaClasseTrack();
 
   //***********************************************************************************
   if (data > 253)
@@ -80,7 +83,7 @@ void MidiApplication::handleMidiCode()
   }
 
   //************************* midi command **********************************************
-  else if (data >= MIDI_COMMAND_NOTE_OFF_FIRST_CANAL && data < 254)
+  else if (data >= MIDI_STATUS_NOTE_OFF_FIRST_CANAL && data < 254)
   {
     this->command = data;
     // this->getDisplayer()->display(this->command);
@@ -143,27 +146,36 @@ void MidiApplication::handleMidiCode()
 
 bool MidiApplication::isNoteOnOrOffCommandChannel1(int command)
 {
-  return (command == MIDI_COMMAND_NOTE_ON_FIRST_CANAL || command == MIDI_COMMAND_NOTE_OFF_FIRST_CANAL);
+  return (command == MIDI_STATUS_NOTE_ON_FIRST_CANAL || command == MIDI_STATUS_NOTE_OFF_FIRST_CANAL);
+}
+
+
+bool MidiApplication::isNoteOffCommand(int command) 
+{
+  return(command>=MIDI_STATUS_NOTE_OFF_FIRST_CANAL && command<=MIDI_STATUS_NOTE_OFF_LAST_CANAL);
 }
 
 bool MidiApplication::isNoteOffCommand() 
 {
-  return(this->command>=MIDI_COMMAND_NOTE_OFF_FIRST_CANAL && this->command<=MIDI_COMMAND_NOTE_OFF_LAST_CANAL);
+  return(this->isNoteOffCommand(this->command));
 }
+
+
+
 
 bool MidiApplication::isNoteOnCommand() 
 {
-  return(this->command>=MIDI_COMMAND_NOTE_ON_FIRST_CANAL && this->command<=MIDI_COMMAND_NOTE_ON_LAST_CANAL);
+  return(this->command>=MIDI_STATUS_NOTE_ON_FIRST_CANAL && this->command<=MIDI_STATUS_NOTE_ON_LAST_CANAL);
 }
 
 bool MidiApplication::isControlChangeCommand() 
 {
-  return(this->command>=MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL && this->command<=MIDI_COMMAND_CONTROL_CHANGE_LAST_CANAL);
+  return(this->command>=MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL && this->command<=MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL);
 }
 
 bool MidiApplication::isProgramChangeCommand() 
 {
-  return(this->command>=MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL && this->command<=MIDI_COMMAND_PROGRAM_CHANGE_LAST_CANAL);
+  return(this->command>=MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL && this->command<=MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL);
 }
 
 //*****************************************************************************
@@ -171,19 +183,19 @@ bool MidiApplication::isProgramChangeCommand()
 
 int MidiApplication::getNoteOffCommandForChannel(int channel)
 {
-  return(MIDI_COMMAND_NOTE_OFF_FIRST_CANAL + channel-1);
+  return(MIDI_STATUS_NOTE_OFF_FIRST_CANAL + channel-1);
 }
 int MidiApplication::getNoteOnCommandForChannel(int channel)
 {
-  return(MIDI_COMMAND_NOTE_ON_FIRST_CANAL + channel-1);  
+  return(MIDI_STATUS_NOTE_ON_FIRST_CANAL + channel-1);  
 }
 int MidiApplication::getControlChangeCommandForChannel(int channel)
 {
-  return(MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL + channel-1);  
+  return(MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL + channel-1);  
 }
 int MidiApplication::getProgramChangeCommandForChannel(int channel)
 {
-  return(MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL + channel-1);  
+  return(MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL + channel-1);  
 }
 
 //Calcule la valeur du canal, à partir de this->command,
@@ -194,19 +206,19 @@ void MidiApplication::setCommandChannel()
 
   if (this->isNoteOffCommand()) 
   {
-    channel1Command = MIDI_COMMAND_NOTE_OFF_FIRST_CANAL;
+    channel1Command = MIDI_STATUS_NOTE_OFF_FIRST_CANAL;
   }
   else if (this->isNoteOnCommand()) 
   {
-    channel1Command = MIDI_COMMAND_NOTE_ON_FIRST_CANAL;
+    channel1Command = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
   }  
   else if (this->isControlChangeCommand()) 
   {
-    channel1Command = MIDI_COMMAND_CONTROL_CHANGE_FIRST_CANAL;
+    channel1Command = MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL;
   }
   else if (this->isProgramChangeCommand()) 
   {
-    channel1Command = MIDI_COMMAND_PROGRAM_CHANGE_FIRST_CANAL;
+    channel1Command = MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL;
   }
   else 
   {
@@ -217,33 +229,26 @@ void MidiApplication::setCommandChannel()
   this->commandChannel = this->command - channel1Command + 1;
 }
 
-// void MidiApplication::setCommandRange()
-// {
-//   this->commandRange = this->command;
-//   this->commandRange = abs(this->commandRange / 10);
-//   //int moduloCommandSur10 = ( this->command - (this->command%10) )/10;
-//   //this->getDisplayer()->display(moduloCommandSur10);  
-// }
 
 
 //*****************************************************************************
 //*****************************************************************************
 
 
-void MidiApplication::sendCurrentMidiCommand()
+void MidiApplication::sendCurrentMidiMessage()
 {
   if (this->isProgramChangeCommand()) 
   {
-    this->sendMidiCommand(this->command, this->data2);
+    this->sendMidiMessage(this->command, this->data2);
   }
   else
   {
-    this->sendMidiCommand(this->command, this->data2, this->data3);
+    this->sendMidiMessage(this->command, this->data2, this->data3);
   }
   
 }
 
-void MidiApplication::sendMidiCommand(int command, int data2, int data3)
+void MidiApplication::sendMidiMessage(int command, int data2, int data3)
 {
   if (command>0)
   {
@@ -268,7 +273,7 @@ void MidiApplication::sendMidiCommand(int command, int data2, int data3)
 void MidiApplication::handleNoteOnOffCommand() 
 {
   //*********switch off split if not ch 1*****************
-  if (this->command > MIDI_COMMAND_NOTE_ON_FIRST_CANAL)
+  if (this->command > MIDI_STATUS_NOTE_ON_FIRST_CANAL)
   {
     this->flag_split = false; //on
     this->switch_split = false;
@@ -284,7 +289,7 @@ void MidiApplication::handleNoteOnOffCommand()
   }
 
   //*****************************************************
-  this->sendCurrentMidiCommand();
+  this->sendCurrentMidiMessage();
 
   //*****************************************************
   //this->getDisplayer()->display("rec_2");
@@ -306,7 +311,7 @@ void MidiApplication::handleNoteOnOffCommand()
   }
   
   //===========================================================
-  // if(this->Play_1)
+  // if(this->play_1_ok)
   // {
   //   this->play_1();
   // }
@@ -327,7 +332,7 @@ void MidiApplication::handleNoteOnOffCommand()
 
   if (this->isNoteOnOrOffCommandChannel1(this->command_tampon) && this->flag_split)
   {
-    //=========== retsore this->command ===========
+    //=========== restore this->command ===========
     this->command = this->command_tampon; //get initial command before go to split
   }
 }
@@ -374,7 +379,7 @@ void MidiApplication::handleControlChangeCommand()
     {
       for (int iNumChannel = 1; iNumChannel < NB_CHANNELS+1; iNumChannel++) //set off all channels
       {
-        this->sendMidiCommand(
+        this->sendMidiMessage(
           this->getControlChangeCommandForChannel(iNumChannel),
           123,
           0
@@ -404,14 +409,14 @@ void MidiApplication::handleControlChangeCommand()
       this->command = this->getControlChangeCommandForChannel(this->commandChannel);
       this->data2 = 7; //level
       //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      this->sendCurrentMidiCommand();
+      this->sendCurrentMidiMessage();
     }
     else if (this->data2 == 2) // ************* Reverb control *************
     {
       this->command =  this->getControlChangeCommandForChannel(this->commandChannel);
       this->data2 = 91; //reverb
       //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-      this->sendCurrentMidiCommand();
+      this->sendCurrentMidiMessage();
     }
 
     else if (this->data2 == 11) // ************* Instrum. change - ************* 
@@ -432,7 +437,7 @@ void MidiApplication::handleControlChangeCommand()
     else if (this->data2 == 20) // ************* Rec track 1 *************
     {
       //----- reset arrays track 1 -----
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command1s[i] = 0;
         this->time1s[i] = 0;
@@ -452,7 +457,7 @@ void MidiApplication::handleControlChangeCommand()
     else if (this->data2 == 21) // ************* Rec track 2 *************
     {
       //----- reset arrays track 2 -----
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command2s[i] = 0;
         this->time2s[i] = 0;
@@ -472,7 +477,7 @@ void MidiApplication::handleControlChangeCommand()
     else if (this->data2 == 22) // ************* Rec track 3 *************
     {
       //----- reset arrays track 3 -----
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command3s[i] = 0;
         this->time3s[i] = 0;
@@ -509,7 +514,7 @@ void MidiApplication::handleControlChangeCommand()
       //this->Ticks = 0;
     }
 
-    else if (this->data2 == 17 && this->data_trk_3 == true) // ************* Play track 3 *************
+    else if (this->data2 == 17 && this->data_trk_3) // ************* Play track 3 *************
     {
       this->data3 = 0;
       this->midiCodeIndex_3 = 0;
@@ -561,7 +566,7 @@ void MidiApplication::prgm_chg_instp()
 
 void MidiApplication::sendProgramChange() 
 {
-  this->sendMidiCommand(this->command, this->inst);
+  this->sendMidiMessage(this->command, this->inst);
 }
 
 
@@ -572,7 +577,7 @@ void MidiApplication::sendProgramChange()
 //**************************record track 1****************************************
 void MidiApplication::record_1()
 {
-  if (this->midiCodeIndex_1 < MAX_NB_MIDI_CODES) //check max array
+  if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES) //check max array
   {
     //if (this->data2 != 96) //wait for the 1st note from keyboard
     //{
@@ -699,7 +704,7 @@ void MidiApplication::play_1()
 {
 
   //this->getDisplayer()->display(this->Ticks);
-  if (this->midiCodeIndex_1 < MAX_NB_MIDI_CODES && this->data_trk_1)
+  if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES && this->data_trk_1)
   {
 
     if (this->Ticks >= this->time1s[this->midiCodeIndex_1])
@@ -721,7 +726,7 @@ void MidiApplication::play_1()
       }
       //if (this->flag_play_1)
       //{
-        this->sendMidiCommand(
+        this->sendMidiMessage(
           this->command1s[this->midiCodeIndex_1],
           this->data21s[this->midiCodeIndex_1],
           this->data31s[this->midiCodeIndex_1]
@@ -762,7 +767,7 @@ void MidiApplication::play_2()
     }
 
     //this->getDisplayer()->display("play_2");
-    this->sendMidiCommand(
+    this->sendMidiMessage(
       this->command2s[this->midiCodeIndex_2],
       this->data22s[this->midiCodeIndex_2],
       this->data32s[this->midiCodeIndex_2]
@@ -778,7 +783,7 @@ void MidiApplication::play_2()
 
       if (this->command2s[this->midiCodeIndex_2] == 0)
       {
-        //this->command2s[this->midiCodeIndex_2] = COMMAND_NOTE_ON_FIRST_CANAL;
+        //this->command2s[this->midiCodeIndex_2] = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
         this->midiCodeIndex_2 = 0;
         this->Ticks = 0;
       }
@@ -800,7 +805,7 @@ void MidiApplication::play_3()
   if (this->Ticks >= this->time3s[this->midiCodeIndex_3])
   {
     //this->getDisplayer()->display("play_2");
-    this->sendMidiCommand(
+    this->sendMidiMessage(
       this->command3s[this->midiCodeIndex_3],
       this->data23s[this->midiCodeIndex_3],
       this->data33s[this->midiCodeIndex_3]
@@ -814,7 +819,7 @@ void MidiApplication::play_3()
 
       if (this->command3s[this->midiCodeIndex_3] == 0)
       {
-        //this->command2s[this->midiCodeIndex_2] = COMMAND_NOTE_ON_FIRST_CANAL;
+        //this->command2s[this->midiCodeIndex_2] = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
         this->midiCodeIndex_3 = 0;
         this->Ticks = 0;
       }
@@ -853,7 +858,7 @@ void MidiApplication::split_kb()
 
 void MidiApplication::sendPitchBend()
 {
-  this->sendMidiCommand(
+  this->sendMidiMessage(
     this->command,
     this->data2
   );
@@ -867,15 +872,14 @@ void MidiApplication::sendPitchBend()
 void MidiApplication::store_nt_on_trk2()
 {
 
-  if (this->command2s[this->midiCodeIndex_2] >= COMMAND_NOTE_ON_FIRST_CANAL 
-      && this->command2s[this->midiCodeIndex_2] <= COMMAND_NOTE_ON_LAST_CANAL
+  if (this->command2s[this->midiCodeIndex_2] >= MIDI_STATUS_NOTE_ON_FIRST_CANAL 
+      && this->command2s[this->midiCodeIndex_2] <= MIDI_STATUS_NOTE_ON_LAST_CANAL
     ) {
     this->note_runing_tr2[this->data22s[this->midiCodeIndex_2]] = this->data22s[this->midiCodeIndex_2];
   }
 
-  if (this->command2s[this->midiCodeIndex_2] >= COMMAND_NOTE_OFF_FIRST_CANAL 
-      && this->command2s[this->midiCodeIndex_2] <= COMMAND_NOTE_OFF_LAST_CANAL
-  ) {
+  if (this->isNoteOffCommand(this->command2s[this->midiCodeIndex_2]))
+  {
     this->note_runing_tr2[this->data22s[this->midiCodeIndex_2]] = 0;
   }
 }

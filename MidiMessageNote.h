@@ -3,13 +3,21 @@
 
 #include <MidiMessage.h>
 
-class MidiMessageNote: public MidiMessage
+class MidiMessageNote: public virtual MidiMessage
 {
 public:
     //--- Déclaration des Méthodes public ---
 
-    MidiMessageNote(); //Constructeur
-    ~MidiMessageNote(); //Destructeur
+    MidiMessageNote(
+        int channel=UNDEFINED_MIDI_CODE,
+        int midiCode=UNDEFINED_MIDI_CODE,
+        int velocity=UNDEFINED_MIDI_CODE
+    ); //Constructeur
+
+    char getMidiCode();
+    void setMidiCode(char midiCode);
+    char getVelocity();
+    void setVelocity(char velocity);
     
     //--- Déclaration des membres public --- (à éviter)
 

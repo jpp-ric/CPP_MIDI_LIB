@@ -8,12 +8,8 @@
 #define MAX_NB_MIDI_CODES 3
 #define UNDEFINED_MIDI_CODE -999
 
-#define MIDI_STATUS_NOTE_OFF_FIRST_CANAL 128
-#define MIDI_STATUS_NOTE_ON_FIRST_CANAL 144
-#define MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL 176
-#define MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL 192
 
-
+#define NB_CHANNELS 16
 
 
 class MidiMessage
@@ -21,12 +17,21 @@ class MidiMessage
 public:
     //--- Déclaration des Méthodes public ---
 
-    MidiMessage(); //Constructeur
-    ~MidiMessage(); //Destructeur
+    MidiMessage(
+        int midiStatus=UNDEFINED_MIDI_CODE,
+        int data1=UNDEFINED_MIDI_CODE, 
+        int data2=UNDEFINED_MIDI_CODE
+    ); //Constructeur
+    virtual ~MidiMessage(); //Destructeur
     
     void addMidiCode(int midiCode);
     bool isComplete();
+    
     char getChannel();
+    void setChannel(char channel);
+
+    int getMidiStatusForChannel(char channel);
+    char getChannelForMidiStatus(int midiStatus);   
 
     int getMidiStatus();
     void setMidiStatus(int midiStatus);

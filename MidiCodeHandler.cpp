@@ -1,5 +1,11 @@
 #include <MidiCodeHandler.h>
+
 #include <MidiMessage.h>
+#include <MidiMessageNoteOn.h>
+#include <MidiMessageNoteOff.h>
+#include <MidiMessageControlChange.h>
+#include <MidiMessageProgramChange.h>
+
 
 MidiCodeHandler::MidiCodeHandler() {
 }
@@ -10,47 +16,46 @@ MidiCodeHandler::~MidiCodeHandler() {
 
 void MidiCodeHandler::handleMidiCode(int midiCode)
 {
-    if (this->isMidiStatus(midiCode))
+    if (MidiCodeHandler::isMidiData(midiCode))
     {
-        if (this->isNoteOnMidiStatus(midiCode))
+        this->addMidiDataToMidiMessage(midiCode);
+    }
+    else if (MidiCodeHandler::isMidiStatus(midiCode))
+    {
+        if (MidiMessageNoteOn::isMidiStatusValid(midiCode))
         {
             this->destroyMidiMessage();
-            this->midiMessage = this->createNoteOnMidiMessage(midiCode);
+            this->midiMessage = this->createMidiMessageNoteOn();
         }
-        else if (this->isNoteOffMidiStatus(midiCode))
+        else if (MidiMessageNoteOff::isMidiStatusValid(midiCode))
         {
             this->destroyMidiMessage();
-            this->midiMessage = this->createNoteOffMidiMessage(midiCode);
+            this->midiMessage = this->createMidiMessageNoteOff();
         }
-        else if (this->isControlChangeMidiStatus(midiCode))
+        else if (MidiMessageControlChange::isMidiStatusValid(midiCode))
         {
             this->destroyMidiMessage();
-            this->midiMessage = this->createControlChangeMidiMessage(midiCode);
+            this->midiMessage = this->createMidiMessageControlChange();
         }
-        else if (this->isProgramChangeMidiStatus(midiCode))
+        else if (MidiMessageProgramChange::isMidiStatusValid(midiCode))
         {
             this->destroyMidiMessage();
-            this->midiMessage = this->createProgramChangeMidiMessage(midiCode);
+            this->midiMessage = this->createMidiMessageProgramChange();
         }
+        this->midiMessage->setMidiStatus(midiCode);
     }
     else
     {
-        this->addMidiCodeToMidiMessage(midiCode);
     }    
 
 }
 
-void MidiCodeHandler::addMidiCodeToMidiMessage(int midiCode)
+void MidiCodeHandler::addMidiDataToMidiMessage(int midiData)
 {
     if (this->midiMessage!=0)
     {
-        this->midiMessage->addMidiCode(midiCode);
+        this->midiMessage->addMidiCode(midiData);
     }
-}
-
-bool MidiCodeHandler::isMidiMessageComplete()
-{
-    return(this->midiMessage->isComplete());
 }
 
 MidiMessage* MidiCodeHandler::getMidiMessage()
@@ -74,51 +79,36 @@ void MidiCodeHandler::destroyMidiMessage()
 
 bool MidiCodeHandler::isMidiStatus(int midiCode)
 {
-    return(midiCode>=MIDI_STATUS_FIRST);
+    return(midiCode>=MIDI_STATUS_FIRST && midiCode<IDLE_MIDI_STATUS);
 }
 
-bool MidiCodeHandler::isNoteOnMidiStatus(int midiCode)
+bool MidiCodeHandler::isMidiData(int midiCode)
 {
-    return(midiCode>=MIDI_STATUS_NOTE_ON_FIRST_CANAL && midiCode<=MIDI_STATUS_NOTE_ON_LAST_CANAL);
-}
-
-bool MidiCodeHandler::isNoteOffMidiStatus(int midiCode)
-{
-    return(midiCode>=MIDI_STATUS_NOTE_OFF_FIRST_CANAL && midiCode<=MIDI_STATUS_NOTE_OFF_LAST_CANAL);
-}
-
-bool MidiCodeHandler::isControlChangeMidiStatus(int midiCode)
-{
-    return(midiCode>=MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL && midiCode<=MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL);
-}
-
-bool MidiCodeHandler::isProgramChangeMidiStatus(int midiCode)
-{
-    return(midiCode>=MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL && midiCode<=MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL);
+    return(midiCode<MIDI_STATUS_FIRST);
 }
 
 //********************************************
 
-MidiMessage* MidiCodeHandler::createNoteOnMidiMessage(int midiCode)
+MidiMessage* MidiCodeHandler::createMidiMessageNoteOn()
 {
-    MidiMessage* midiMessage = new NoteOnMidiMessage(midiCode);
+    MidiMessage* midiMessage = new MidiMessageNoteOn();
     return(midiMessage);
 }
 
-MidiMessage* MidiCodeHandler::createNoteOffMidiMessage(int midiCode)
+MidiMessage* MidiCodeHandler::createMidiMessageNoteOff()
 {
-    MidiMessage* midiMessage = new NoteOffMidiMessage(midiCode);
+    MidiMessage* midiMessage = new MidiMessageNoteOff();
     return(midiMessage);
 }
 
-MidiMessage* MidiCodeHandler::createControlChangeMidiMessage(int midiCode)
+MidiMessage* MidiCodeHandler::createMidiMessageControlChange()
 {
-    MidiMessage* midiMessage = new ControlChangeMidiMessage(midiCode);
+    MidiMessage* midiMessage = new MidiMessageControlChange();
     return(midiMessage);
 }
 
-MidiMessage* MidiCodeHandler::createProgramChangeMidiMessage(int midiCode)
+MidiMessage* MidiCodeHandler::createMidiMessageProgramChange()
 {
-    MidiMessage* midiMessage = new ProgramChangeMidiMessage(midiCode);
+    MidiMessage* midiMessage = new MidiMessageProgramChange();
     return(midiMessage);
 }
