@@ -477,7 +477,7 @@ void MidiApplication::handleControlChangeCommand()
     else if (this->data2 == 20) // ************* Rec track 1 *************
     {
       //=========reset arrays track 1======================
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command1s[i] = 0;
         this->time1s[i] = 0;
@@ -520,7 +520,7 @@ void MidiApplication::handleControlChangeCommand()
       this->rec_1_ok = false;
       //int i = 0;
       //=============reset arrays track 2=========================
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
 
         this->command2s[i] = 0;
@@ -557,7 +557,7 @@ void MidiApplication::handleControlChangeCommand()
       this->rec_2_ok = false;
       //int i = 0;
       //=============reset arrays track 3=========================
-      for (int i = 0; i < MAX_NB_MIDI_CODES; i++)
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command3s[i] = 0;
         this->time3s[i] = 0;
@@ -772,7 +772,7 @@ void MidiApplication::record_1()
 //**************************record 2****************************************
 void MidiApplication::record_2()
 {
-  if (this->midiCodeIndex_2 < MAX_NB_MIDI_CODES) //check max array
+  if (this->midiCodeIndex_2 < MAX_NB_MIDI_MESSAGES) //check max array
   {
     if (this->rec_2_ok) //switch of the first note = "on"
     {
@@ -886,7 +886,7 @@ void MidiApplication::play_1()
 
   //int i=  Track->telleMethodeDeLaClasseTrack():
   //this->getDisplayer()->display(2342);
-  if (this->midiCodeIndex_1 < MAX_NB_MIDI_CODES && this->data_trk_1)
+  if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES && this->data_trk_1)
   {
     //this->getDisplayer()->display(this->midiCodeIndex_1);
     if (this->Ticks >= this->time1s[this->midiCodeIndex_1])
@@ -955,7 +955,7 @@ void MidiApplication::play_2()
 {
 
   //this->getDisplayer()->display(this->data_trk_2);
-  if (this->midiCodeIndex_2 < MAX_NB_MIDI_CODES && this->data_trk_2)
+  if (this->midiCodeIndex_2 < MAX_NB_MIDI_MESSAGES && this->data_trk_2)
   {
 
     if (this->Ticks >= this->time2s[this->midiCodeIndex_2])
@@ -1010,7 +1010,7 @@ void MidiApplication::play_3()
   }*/
 
   //this->getDisplayer()->display("play3");
-  if (this->midiCodeIndex_3 < MAX_NB_MIDI_CODES && this->data_trk_3)
+  if (this->midiCodeIndex_3 < MAX_NB_MIDI_MESSAGES && this->data_trk_3)
   {
     if (this->Ticks >= this->time3s[this->midiCodeIndex_3])
     {
