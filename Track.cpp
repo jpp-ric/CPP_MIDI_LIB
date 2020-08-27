@@ -2,9 +2,9 @@
 
 #include <IDisplayer.h>
 
-Track::Track()
+Track::Track(int number)
 {
-    this->telleMembreDeLaClasseTrack = 5;
+    this->number = number;
 }
 
 Track::~Track()
@@ -21,11 +21,11 @@ IDisplayer* Track::getDisplayer()
     return (this->displayer);
 }
 
-int Track::telleMethodeDeLaClasseTrack()
+int Track::getNumber()
 {
-    int zz = 87;
-
-    // this->getDisplayer()->display(99999);
-
-    return (zz);
+    return (this->number);
+}
+void Track::setNumber(int number)
+{
+    this->number = number;
 }

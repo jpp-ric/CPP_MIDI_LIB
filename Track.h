@@ -8,15 +8,19 @@ class Track
 public:
     //--- Déclaration des Méthodes public ---
 
-    Track(); //Constructeur
+    Track(int number); //Constructeur
     ~Track(); //Destructeur
 
-    int telleMethodeDeLaClasseTrack();
+    void setNumber(int number);
+    int getNumber();
     void setDisplayer(IDisplayer* displayer);
-
     
     //--- Déclaration des membres public --- (à éviter)
-    int telleMembreDeLaClasseTrack;
+
+    // int command[MAX_NB_MIDI_MESSAGES];
+    // int times[MAX_NB_MIDI_MESSAGES];
+    // int data2[MAX_NB_MIDI_MESSAGES];
+    // int data3[MAX_NB_MIDI_MESSAGES];    
  
 private:
 
@@ -25,6 +29,7 @@ private:
 
     //--- Déclaration des membres private ---
     IDisplayer* displayer = 0;
+    int number = 1;
 
 };
 
