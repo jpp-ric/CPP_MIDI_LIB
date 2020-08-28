@@ -19,6 +19,7 @@ public:
 protected:
     //--- Déclaration des Méthodes protected ---
     int getFirstCanalMidiStatus();
+    char getMaxNbMidiCodes();
 
     //--- Déclaration des membres protected ---
  

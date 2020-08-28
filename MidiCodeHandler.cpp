@@ -11,6 +11,7 @@ MidiCodeHandler::MidiCodeHandler() {
 }
 
 MidiCodeHandler::~MidiCodeHandler() {
+    this->destroyMidiMessage();
 }
 
 
