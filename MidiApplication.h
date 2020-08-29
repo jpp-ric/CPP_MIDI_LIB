@@ -3,6 +3,7 @@
 #include <Track.h>
 
 #include <MidiCodeHandler.h>
+#include <MidiMessage.h>
 #include <MidiMessageNoteOn.h>
 
 #define NB_RUNNING_NOTES 100
@@ -162,8 +163,10 @@ private:
     //--- Déclaration des Membres private ---
     Track* track1 = 0;
     IMidiStream* midiStream = 0;
+    MidiCodeHandler* midiCodeHandler = 0;
+    MidiMessage* currentMidiMessage = 0;
     IDisplayer* displayer = 0;
-    int CurrentChannelNumberNote=144;
+    // int CurrentChannelNumberNote=144;
     int octav = 0;
     int command = 0;
     int data2 = 60;

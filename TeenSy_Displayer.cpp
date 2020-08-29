@@ -11,6 +11,10 @@ void TeenSy_Displayer::display(char* text) {
     this->displayer->println(text);
 }
 
+void TeenSy_Displayer::display(const char* text) {
+    this->displayer->println(text);
+}
+
 void TeenSy_Displayer::display(int integer) {
     this->displayer->println(integer);
 }

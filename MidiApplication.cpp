@@ -15,14 +15,18 @@
 MidiApplication::MidiApplication(IMidiStream *midiStream)
 {
   this->midiStream = midiStream;
+  this->midiCodeHandler = new MidiCodeHandler();
 
   this->track1 = new Track(1);
 }
 
 MidiApplication::~MidiApplication()
 {
+  delete this->midiCodeHandler;
+  this->midiCodeHandler = 0;
+
   delete this->track1;
-  this->track1 = 0;
+  this->track1 = 0;  
 }
 
 IMidiStream *MidiApplication::getMidiStream()
@@ -71,8 +75,16 @@ void MidiApplication::init()
 void MidiApplication::handleMidiCode()
 {
   int data = this->getMidiStreamCurrentMidiCode();
-
   // this->getDisplayer()->display(data);
+
+  this->midiCodeHandler->handleMidiCode(data);
+  this->currentMidiMessage = this->midiCodeHandler->getMidiMessage();
+  if (this->currentMidiMessage) 
+  {
+    
+  }
+
+
 
   //***********************************************************************************
   if (data > 253)
