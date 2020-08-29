@@ -721,7 +721,7 @@ void MidiApplication::sendProgramChange()
 //**************************record 1****************************************
 void MidiApplication::record_1()
 {
-  if (this->midiCodeIndex_1 <MAX_NB_MIDI_CODES) //check max array
+  if (this->midiCodeIndex_1 <MAX_NB_MIDI_MESSAGES) //check max array
   {
     //if (this->data2 != 96) //wait for the 1st note from keyboard
     //{
