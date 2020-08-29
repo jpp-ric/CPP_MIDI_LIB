@@ -96,13 +96,13 @@ void MidiApplication::handleMidiCode()
   else if (data >= MIDI_STATUS_NOTE_OFF_FIRST_CANAL && data < 254)
   {
     this->command = data;
+    
     // this->GetCurrentChannelNumberNoteon(this->command);
-    if (this->isNoteOnCommand()) {
+   /* if (this->isNoteOnCommand())
+    {
       this->setCommandChannel(); //Calcule this->commandChannel
-    //   this->CurrentChannelNumberNote = this->getCommandChannel(this->command);
-    //   this->getDisplayer()->display( this->CurrentChannelNumberNote );
-      // this->getDisplayer()->display( this->commandChannel );
-    }
+      
+    }*/
     return;
   }
 
@@ -112,6 +112,18 @@ void MidiApplication::handleMidiCode()
     this->flag = true;
 
     this->data2 = data;
+    //============get data2 on control change==================
+    if(this->isControlChangeCommand(this->command)){
+      this->data2ControlChg=this->data2;
+    }
+    //=========================================================
+    //=================get channel on "note on"================
+     if (this->isNoteOnCommand())
+    {
+      this->setCommandChannel(); //Calcule this->commandChannel
+    }
+    //========================================================
+    //==================pitch bend=========================
     if (this->command > 223 && this->command < 240)
     {
       this->sendPitchBend();
@@ -127,6 +139,7 @@ void MidiApplication::handleMidiCode()
     this->flag = false;
 
     this->data3 = data;
+   
     if (this->command == 224)
     {
       //this->getDisplayer()->display(this->data2);
@@ -137,9 +150,14 @@ void MidiApplication::handleMidiCode()
 
   //****************************************************************************************
   //****************************************************************************************
-  //****************************************************************************************
-
-  // this->setCommandChannel(); //Calcule this->commandChannel
+  //**************************bank change**************************************************************
+ 
+  if((this->data2 == BANK1 || this->data2 == BANK2 || this->data2 == BANK3 || this->data2 == BANK4)
+  && this->data2ControlChg == 13 && this->isNoteOnCommand()){
+   this->data2ControlChg == 0;//data2 on contl change (common to several command)
+  this->BankChg();
+  } 
+  //=============================================================
   //this->getDisplayer()->display(this->commandChannel);
 
   if (this->isNoteOnCommand() || this->isNoteOffCommand()) // ************* NOTE OFF/ON *************
@@ -181,6 +199,7 @@ bool MidiApplication::isNoteOnCommand()
 
 bool MidiApplication::isControlChangeCommand(int command)
 {
+  
   return (command >= MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL && command <= MIDI_STATUS_CONTROL_CHANGE_LAST_CANAL);
 }
 bool MidiApplication::isControlChangeCommand()
@@ -221,12 +240,13 @@ int MidiApplication::getProgramChangeCommandForChannel(int channel)
 //ET affecte cette valeur à this->commandChannel.
 void MidiApplication::setCommandChannel()
 {
- this->commandChannel = this->getCommandChannel(this->command);
+  this->commandChannel = this->getCommandChannel(this->command);
 }
 
-int MidiApplication::getCommandChannel(int command) {
- int channel1Command;
- int channel;
+int MidiApplication::getCommandChannel(int command)
+{
+  int channel1Command;
+  int channel;
 
   if (this->isNoteOffCommand(command))
   {
@@ -239,6 +259,7 @@ int MidiApplication::getCommandChannel(int command) {
   else if (this->isControlChangeCommand(command))
   {
     channel1Command = MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL;
+    
   }
   else if (this->isProgramChangeCommand(command))
   {
@@ -250,8 +271,8 @@ int MidiApplication::getCommandChannel(int command) {
     channel1Command = command;
   }
 
-  channel = command - channel1Command + 1;  
-  return(channel);
+  channel = command - channel1Command + 1;
+  return (channel);
 }
 
 //*****************************************************************************
@@ -327,23 +348,6 @@ void MidiApplication::handleNoteOnOffCommand()
   {
     this->record_3();
   }
-
-  //===========================================================
-  /*if(this->play_1_ok)
-   {
-     this->play_1();
-   }*/
-
-  //============================================================
-  /*if (this->play_2_ok)
-  {
-    this->play_2();
-  }
-  //=============================================================
-  if (this->play_3_ok)
-  {
-    this->play_3();
-  }*/
 
   //**************************************************************
 
@@ -434,11 +438,7 @@ void MidiApplication::handleControlChangeCommand()
     //=======================================================================
     else if (this->data2 == 7) //1) // ******** Level control channel*************
     {
-      // this->command = STAT_CONTL_CHG + this->CurrentChannelNumberNote;
-      this->command = this->getControlChangeCommandForChannel(this->commandChannel);
-      //this->data2 = LEVEL_NUMBER;//level
-      //this->getDisplayer()->display(this->command);
-      //this->sendMidiMessage(this->command,this->data2,this->data3);
+
       this->sendCurrentMidiMessage();
     }
 
@@ -449,42 +449,33 @@ void MidiApplication::handleControlChangeCommand()
     //====================level control current note===================
     else if (this->data2 == 1) // ************* Level control current note *************
     {
-      // this->command = STAT_CONTL_CHG + this->CurrentChannelNumberNote;
+
       this->command = this->getControlChangeCommandForChannel(this->commandChannel);
-      this->data2 = LEVEL_NUMBER;                                      // level
+      this->data2 = LEVEL_NUMBER; // level
       //this->getDisplayer()->display(this->command);
-      // this->sendMidiMessage(this->command, this->data2, this->data3);
+
       this->sendCurrentMidiMessage();
     }
     // ************* Reverb control **********************************
     else if (this->data2 == 2)
     {
-      // this->command = (this->command-1) + this->CurrentChannelNumberNote;
-      // this->command = STAT_CONTL_CHG + this->commandChannel;
-      this->data2 = REVERB_NUMBER;                                    //reverb
+
+      this->data2 = REVERB_NUMBER; //reverb
       this->command = this->getControlChangeCommandForChannel(this->commandChannel);
-      //this->data2 = 91; //reverb
 
       //this->getDisplayer()->display(this->command);
-      // this->sendMidiMessage(this->command, this->data2, this->data3);
+
       this->sendCurrentMidiMessage();
     }
     //=======================prgm chg=========================================
-    else if (this->data2 == 11 || this->data2 == 12)// ************* Instrum. change - *************
-    {
-      this->command = this->getProgramChangeCommandForChannel(this->commandChannel);
-    // this->command = this->command + STATUS_INTERVAL + this-CurrentChannelNumberNote;
-    // this->command = STAT_PRG_CHG + this->commandChannel;
-    
-    //this->getDisplayer()->display(this->command);
-      this->prgm_chg_inst(); //instr chang decr
-    }
-    /*else if (this->data2 == 12) // ************* Instrum. change + *************
+    else if (this->data2 == 11 || this->data2 == 12) // ************* Instrum. change - *************
     {
       this->command = this->getProgramChangeCommandForChannel(this->commandChannel);
 
-      this->prgm_chg_instp(); //instr chang incr
-    }*/
+      //this->getDisplayer()->display(this->command);
+      this->prgm_chg_inst(); //instr chang decr
+    }
+
     //===================start record1============================
     else if (this->data2 == 20) // ************* Rec track 1 *************
     {
@@ -495,7 +486,7 @@ void MidiApplication::handleControlChangeCommand()
         this->time1s[i] = 0;
         this->data21s[i] = 0;
         this->data31s[i] = 0;
-        
+
         // this->track1->command[i] = 0;
         // this->track1->times[i] = 0;
         // this->track1->data2[i] = 0;
@@ -520,11 +511,12 @@ void MidiApplication::handleControlChangeCommand()
     //================start record2==================================
     else if (this->data2 == 21) // ************* Rec track 2 *************
     {
-      if(this->play_loop2){
-       this->play_loop2=false;
-       this->play_2_ok=false; 
-      this->Flag_Send_trk2=false;
-      this->DeleteNtonLoopTrack2();
+      if (this->play_loop2)
+      {
+        this->play_loop2 = false;
+        this->play_2_ok = false;
+        this->Flag_Send_trk2 = false;
+        this->DeleteNtonLoopTrack2();
       }
       //this->getDisplayer()->display("rec2");
       this->data_trk_2 = false;
@@ -556,11 +548,12 @@ void MidiApplication::handleControlChangeCommand()
     //=============start reccord3================================
     else if (this->data2 == 22) // ************* Rec track 3 *************
     {
-      if(this->play_loop3){
-       this->play_loop3=false;
-       this->play_3_ok=false; 
-      this->Flag_Send_trk3=false;
-      this->DeleteNtonLoopTrack3();
+      if (this->play_loop3)
+      {
+        this->play_loop3 = false;
+        this->play_3_ok = false;
+        this->Flag_Send_trk3 = false;
+        this->DeleteNtonLoopTrack3();
       }
 
       this->data_trk_3 = false;
@@ -740,7 +733,7 @@ void MidiApplication::sendProgramChange()
 //**************************record 1****************************************
 void MidiApplication::record_1()
 {
-  if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES) //check max array
+  if (this->midiCodeIndex_1 <MAX_NB_MIDI_MESSAGES) //check max array
   {
     //if (this->data2 != 96) //wait for the 1st note from keyboard
     //{
@@ -943,10 +936,9 @@ void MidiApplication::play_1()
       //if (this->flag_play_1)
       //{
 
-      this->sendMidiMessage(this->command1s[this->midiCodeIndex_1], 
+      this->sendMidiMessage(this->command1s[this->midiCodeIndex_1],
                             this->data21s[this->midiCodeIndex_1],
-                            this->data31s[this->midiCodeIndex_1]
-                           );
+                            this->data31s[this->midiCodeIndex_1]);
       /*this->midiStream->write(this->command1s[this->midiCodeIndex_1]);
       this->midiStream->write(this->data21s[this->midiCodeIndex_1]);
       this->midiStream->write(this->data31s[this->midiCodeIndex_1]);
@@ -992,10 +984,9 @@ void MidiApplication::play_2()
       //this->getDisplayer()->display("play_222");
       if (this->Flag_Send_trk2)
       {
-        this->sendMidiMessage(this->command2s[this->midiCodeIndex_2], 
+        this->sendMidiMessage(this->command2s[this->midiCodeIndex_2],
                               this->data22s[this->midiCodeIndex_2],
-                              this->data32s[this->midiCodeIndex_2]
-                             );
+                              this->data32s[this->midiCodeIndex_2]);
         /*this->midiStream->write(this->command2s[this->midiCodeIndex_2]);
       this->midiStream->write(this->data22s[this->midiCodeIndex_2]);
       this->midiStream->write(this->data32s[this->midiCodeIndex_2]);
@@ -1043,10 +1034,9 @@ void MidiApplication::play_3()
       //this->getDisplayer()->display("play_2");
       if (this->Flag_Send_trk3)
       {
-        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3], 
+        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3],
                               this->data23s[this->midiCodeIndex_3],
-                              this->data33s[this->midiCodeIndex_3]
-                             );
+                              this->data33s[this->midiCodeIndex_3]);
         /*   
       this->midiStream->write(this->command3s[this->midiCodeIndex_3]);
       this->midiStream->write(this->data23s[this->midiCodeIndex_3]);
@@ -1092,7 +1082,6 @@ void MidiApplication::sendPitchBend()
 
 //*********************************************************************
 //*********************************************************************
-
 
 //==================delete runing note on loop track 2============
 
@@ -1225,11 +1214,10 @@ void MidiApplication::Inst_ChgCh1()
     if (this->inst1 > 0)
     {
       this->inst1 -= 1;
-      
     }
   }
   this->inst = this->inst1;
-  // this->getDisplayer()->display("plus");
+  this->getDisplayer()->display(this->command);
   this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh2()
@@ -1243,17 +1231,18 @@ void MidiApplication::Inst_ChgCh2()
   }
   else if (this->data2 == 11)
   {
-    if (this->inst2> 0)
+    if (this->inst2 > 0)
     {
       this->inst2 -= 1;
     }
   }
+  this->getDisplayer()->display(this->command);
   this->inst = this->inst2;
   this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh3()
 {
-if (this->data2 == 12)
+  if (this->data2 == 12)
   {
     if (this->inst3 < 128)
     {
@@ -1267,11 +1256,12 @@ if (this->data2 == 12)
       this->inst3 -= 1;
     }
   }
- this->inst = this->inst3; 
-this->sendProgramChange();
+  this->inst = this->inst3;
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh4()
-{if (this->data2 == 12)
+{
+  if (this->data2 == 12)
   {
     if (this->inst4 < 128)
     {
@@ -1286,12 +1276,11 @@ void MidiApplication::Inst_ChgCh4()
     }
   }
   this->inst = this->inst4;
-this->sendProgramChange();
-
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh5()
 {
- if (this->data2 == 12)
+  if (this->data2 == 12)
   {
     if (this->inst5 < 128)
     {
@@ -1306,7 +1295,7 @@ void MidiApplication::Inst_ChgCh5()
     }
   }
   this->inst = this->inst5;
-this->sendProgramChange(); 
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh6()
 {
@@ -1325,7 +1314,7 @@ void MidiApplication::Inst_ChgCh6()
     }
   }
   this->inst = this->inst6;
-this->sendProgramChange();
+  this->sendProgramChange();
 }
 
 void MidiApplication::Inst_ChgCh7()
@@ -1345,10 +1334,11 @@ void MidiApplication::Inst_ChgCh7()
     }
   }
   this->inst = this->inst7;
-this->sendProgramChange();
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh8()
-{if (this->data2 == 12)
+{
+  if (this->data2 == 12)
   {
     if (this->inst8 < 128)
     {
@@ -1363,8 +1353,7 @@ void MidiApplication::Inst_ChgCh8()
     }
   }
   this->inst = this->inst8;
-this->sendProgramChange();
-
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh9()
 {
@@ -1383,7 +1372,7 @@ void MidiApplication::Inst_ChgCh9()
     }
   }
   this->inst = this->inst9;
-this->sendProgramChange();
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh10()
 {
@@ -1402,7 +1391,7 @@ void MidiApplication::Inst_ChgCh10()
     }
   }
   this->inst = this->inst10;
-this->sendProgramChange();
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh11()
 {
@@ -1421,7 +1410,7 @@ void MidiApplication::Inst_ChgCh11()
     }
   }
   this->inst = this->inst11;
-this->sendProgramChange();
+  this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh12()
 {
@@ -1440,5 +1429,53 @@ void MidiApplication::Inst_ChgCh12()
     }
   }
   this->inst = this->inst12;
-this->sendProgramChange();
+  this->sendProgramChange();
+}
+//====================bank change================================
+void MidiApplication::BankChg()
+{
+  int tampon=this->data2;
+  int tampon1=this->data3;
+  int tampon3=this->command;
+if(this->data2 == BANK1)//bank1
+{
+  
+  this->command = this->getControlChangeCommandForChannel(this->commandChannel);//STAT_CONTL_CHG + this->commandChannel;
+  this->data2=0;
+  this->data3=0;
+  //this->getDisplayer()->display(this->command);
+  this->sendCurrentMidiMessage();
+  
+}
+
+else if(this->data2 == BANK2)//bank2
+{
+
+  this->command = this->getControlChangeCommandForChannel(this->commandChannel);//STAT_CONTL_CHG + this->commandChannel;
+  this->data2=0;
+  this->data3=1;
+  //this->getDisplayer()->display(this->command);
+  this->sendCurrentMidiMessage();
+  
+}
+else if(this->data2 == BANK3)//bank3
+{
+  this->command = this->getControlChangeCommandForChannel(this->commandChannel);//STAT_CONTL_CHG + this->commandChannel;
+  this->data2=0;
+  this->data3=10;
+  
+  this->sendCurrentMidiMessage();
+  
+}
+else if(this->data2 == BANK4)//bank4
+{
+  this->command = this->getControlChangeCommandForChannel(this->commandChannel);//STAT_CONTL_CHG + this->commandChannel;
+  this->data2=0;
+  this->data3=11;
+  this->sendCurrentMidiMessage();
+  
+}
+this->data2=tampon;
+this->data3=tampon1;
+this->command=tampon3;
 }

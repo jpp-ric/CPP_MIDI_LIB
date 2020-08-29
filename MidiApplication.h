@@ -14,6 +14,11 @@
 
 #define LEVEL_NUMBER 7
 #define REVERB_NUMBER 91
+#define BANK1 36
+#define BANK2 37
+#define BANK3 38
+#define BANK4 39
+
 // #define STATUS_INTERVAL NB_CHANNELS - 1
 
 
@@ -156,7 +161,7 @@ private:
     void prgm_chg_instp();
 
     void split_kb();
-
+    void BankChg();
     void store_nt_on_trk2();
     void turn_off_nt_trk2();
 
@@ -180,6 +185,7 @@ private:
     int inst = 1;
     int inst_1 = 1;
     int inst_2 = 1;
+    int data2ControlChg = 0;
 
     bool switch_split = false;
     bool flag_split = false;
