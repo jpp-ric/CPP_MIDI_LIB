@@ -3,6 +3,9 @@
 
 #include <IDisplayer.h>
 
+#define MAX_NB_MIDI_MESSAGES 3000
+#define MAX_NB_TIMES MAX_NB_MIDI_MESSAGES
+
 class Track
 {
 public:
@@ -18,9 +21,9 @@ public:
     //--- Déclaration des membres public --- (à éviter)
 
     // int command[MAX_NB_MIDI_MESSAGES];
-    // int times[MAX_NB_MIDI_MESSAGES];
     // int data2[MAX_NB_MIDI_MESSAGES];
     // int data3[MAX_NB_MIDI_MESSAGES];    
+    // int times[MAX_NB_TIMES];
  
 private:
 

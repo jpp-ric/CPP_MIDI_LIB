@@ -11,6 +11,7 @@ MidiCodeHandler::MidiCodeHandler() {
 }
 
 MidiCodeHandler::~MidiCodeHandler() {
+    this->destroyMidiMessage();
 }
 
 
@@ -22,24 +23,21 @@ void MidiCodeHandler::handleMidiCode(int midiCode)
     }
     else if (MidiCodeHandler::isMidiStatus(midiCode))
     {
+        this->destroyMidiMessage();
         if (MidiMessageNoteOn::isMidiStatusValid(midiCode))
         {
-            this->destroyMidiMessage();
             this->midiMessage = this->createMidiMessageNoteOn();
         }
         else if (MidiMessageNoteOff::isMidiStatusValid(midiCode))
         {
-            this->destroyMidiMessage();
             this->midiMessage = this->createMidiMessageNoteOff();
         }
         else if (MidiMessageControlChange::isMidiStatusValid(midiCode))
         {
-            this->destroyMidiMessage();
             this->midiMessage = this->createMidiMessageControlChange();
         }
         else if (MidiMessageProgramChange::isMidiStatusValid(midiCode))
         {
-            this->destroyMidiMessage();
             this->midiMessage = this->createMidiMessageProgramChange();
         }
         this->midiMessage->setMidiStatus(midiCode);

@@ -5,8 +5,6 @@
 #include <MidiCodeHandler.h>
 #include <MidiMessageNoteOn.h>
 
-#define MAX_NB_MIDI_MESSAGES 3000
-#define MAX_NB_TIMES MAX_NB_MIDI_MESSAGES
 #define NB_RUNNING_NOTES 100
 #define NT_RUN_MAX 100
 
