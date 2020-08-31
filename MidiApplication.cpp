@@ -138,22 +138,22 @@ void MidiApplication::handleMidiCode()
 
     this->data3 = data;
     //============store data2 control change==================
-    this->getDisplayer()->display("\r\n");
+    /*this->getDisplayer()->display("\r\n");
     this->getDisplayer()->display(this->command);
     this->getDisplayer()->display(this->data2);
     this->getDisplayer()->display(this->data3);
-
+    */
     if (this->command == 176 && this->data3 > 0)
     {
       this->control28 = 28;
       this->Control_Button[this->data2] = this->data2;
-      this->getDisplayer()->display("this->command == 176 && this->data3 > 0");
+      //this->getDisplayer()->display("this->command == 176 && this->data3 > 0");
     }
     if (this->command == 176 && this->data3 == 0)
     {
       this->control28 = 0;
       this->Control_Button[this->data2] = 0;
-      this->getDisplayer()->display("this->command == 176 && this->data3 == 0");
+      //this->getDisplayer()->display("this->command == 176 && this->data3 == 0");
     }
 
     //===============================================
@@ -611,7 +611,7 @@ void MidiApplication::handleControlChangeCommand()
     //=============start reccord4================================
     else if (this->Control_Button[13] > 0 && this->Control_Button[28] == 28) // ************* Rec track 4 *************
     {
-      this->getDisplayer()->display("13 ???");
+      //this->getDisplayer()->display("13 ???");
       this->Control_Button[28] = 30;
       if (this->play_loop4)
       {
@@ -677,6 +677,13 @@ void MidiApplication::handleControlChangeCommand()
           this->data3 = 0;
           this->play_3_ok = true;
           this->flag_play_3 = true;
+        }
+        if (data_trk_4) //if track3 not empty
+        {
+          this->midiCodeIndex_4 = 0;
+          this->data3 = 0;
+          this->play_4_ok = true;
+          this->flag_play_4 = true;
         }
         //==================================
       }
@@ -752,7 +759,7 @@ void MidiApplication::handleControlChangeCommand()
     if (this->Control_Button[28] == 28) //this->control28 == 28)
     {
       //this->Control_Button[28] = 30;
-      this->getDisplayer()->display("this->Control_Button[28] == 28 ;(data3>0)");
+      //this->getDisplayer()->display("this->Control_Button[28] == 28 ;(data3>0)");
       if (!this->switch_on_off_trk4)
       {
         if (!this->play_loop)
@@ -772,12 +779,12 @@ void MidiApplication::handleControlChangeCommand()
       }
     }
   } //FIN : if (this->data3 > 0)
-
+//====================stop play4=============================
   if (this->Control_Button[28] == 0) //this->control28 == 0) //;this->Control_Button[28] == 0)
   {
     //this->Control_Button[28] == 30;
     this->control28 = 23;
-    this->getDisplayer()->display("this->Control_Button[28] == 0");
+    //this->getDisplayer()->display("this->Control_Button[28] == 0");
     if (this->switch_on_off_trk4)
     {
       if (!this->play_loop)
@@ -795,9 +802,10 @@ void MidiApplication::handleControlChangeCommand()
 
         this->Flag_Send_trk4 = false;
       }
-      //this->DeleteNtonLoopTrack4();
+      this->DeleteNtonLoopTrack4();
     }
   }
+  //==========================================================
 }
 
 //*********************************************************************
@@ -903,6 +911,7 @@ void MidiApplication::record_1()
 //**************************record 2****************************************
 void MidiApplication::record_2()
 {
+  this->getDisplayer()->display("rec2");
   if (this->midiCodeIndex_2 < MAX_NB_MIDI_MESSAGES) //check max array
   {
     if (this->rec_2_ok) //switch of the first note = "on"
@@ -918,6 +927,8 @@ void MidiApplication::record_2()
       if (this->play_loop)
       {
         this->DeleteNtonLoopTrack1();
+        this->DeleteNtonLoopTrack3();
+        this->DeleteNtonLoopTrack4();
         this->play_1(); //start play track 1
       }
       //======================================
@@ -961,6 +972,8 @@ void MidiApplication::record_2()
 //**************************record 3****************************************
 void MidiApplication::record_3()
 {
+
+  this->getDisplayer()->display("rec3");
   if (this->rec_3_ok) //switch of the first note = "on"
   {
     //===========init on firt note=============
@@ -976,6 +989,8 @@ void MidiApplication::record_3()
     if (this->play_loop)
     {
       this->DeleteNtonLoopTrack1();
+      this->DeleteNtonLoopTrack2();
+      this->DeleteNtonLoopTrack4();
       this->play_1(); //start play track 1
     }
     //======================================
@@ -1016,6 +1031,7 @@ void MidiApplication::record_3()
 //==============record 4====================================
 void MidiApplication::record_4()
 {
+  this->getDisplayer()->display("rec4");
   if (this->rec_4_ok) //switch of the first note = "on"
   {
     //===========init on firt note=============
@@ -1032,6 +1048,8 @@ void MidiApplication::record_4()
     if (this->play_loop)
     {
       this->DeleteNtonLoopTrack1();
+      this->DeleteNtonLoopTrack3();
+      this->DeleteNtonLoopTrack2();
       this->play_1(); //start play track 1
     }
     //======================================
@@ -1147,7 +1165,7 @@ void MidiApplication::play_1()
         this->midiCodeIndex_1 = 0;
         this->midiCodeIndex_2 = 0;
         this->midiCodeIndex_3 = 0;
-
+        this->midiCodeIndex_4 = 0;
         return;
       }
       //if (this->flag_play_1)
