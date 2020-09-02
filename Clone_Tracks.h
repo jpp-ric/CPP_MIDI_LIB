@@ -1,8 +1,8 @@
 
 
 //========store on note"on"/delete on note "off"============
-/*
-void MidiApplication::StoreRuningNoteTrkX()
+
+void MidiApplication::StoreRuningNoteTrkx()
 {
   if (!this->isNoteOffCommand(this->commandtrkx[this->midiCodeIndex_trkx]))
   {
@@ -32,8 +32,8 @@ void MidiApplication::DeleteNtonLoopTrkx()
     }
   }
 }
-*/
-/* //**************** flag playTrkx *************
+//===================.ino=========================
+ //**************** flag playTrkx *************
   
   if (midiApplication->playTrkx_ok)
   {
@@ -50,10 +50,12 @@ void MidiApplication::DeleteNtonLoopTrkx()
   {
     
     midiApplication->playTrkx();
-  }*/
+  }
 //================================================
 
+//=========================.cpp=============================
 //======================start play 4==============================
+void MidiApplication::StartStopPlayTrkx(){
     if (this->Control_Button[28] == 28) //this->control28 == 28)
     {      
       if (!this->switch_on_off_trkx)
@@ -98,7 +100,49 @@ void MidiApplication::DeleteNtonLoopTrkx()
       this->DeleteNtonLoopTrkx();
     }
   }
+}
   //==========================================================
+
+  //=============start reccord5================================
+    else if (this->Control_Button[13] > 0 && this->Control_Button[28] == 28) // ************* Rec track 4 *************
+    {
+      //this->getDisplayer()->display("13 ???");
+      this->Control_Button[28] = 30;
+      if (this->play_loopTrkx)
+      {
+        this->play_loopTrkx = false;
+        this->play_Trkx_ok = false;
+        this->Flag_Send_Trkx = false;
+        this->DeleteNtonLoopTrkx();
+      }
+
+      this->data_Trkx = false;
+      this->start_Trkx = true;
+      this->rec_1_ok = false;
+      this->rec_2_ok = false;
+      this->rec_3_ok = false;
+      //int i = 0;
+      //=============reset arrays track 3=========================
+      for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
+      {
+        this->commandTrkx[i] = 0;
+        this->timeTrkx[i] = 0;
+        this->data2Trkx[i] = 0;
+        this->data3Trkx[i] = 0;
+      }
+      //=========init array "delete nt off track 2"==================
+      for (int i = 0; i < 100; i++)
+      {
+        this->Store_Vel_Run_NT_Trkx[i] = 0;
+        this->Store_Vel_Run_ST_Trkx[i] = 0;
+      }
+      //================================================
+      this->rec_Trkx_ok = true;
+
+      this->midiCodeIndexTrkx = 0;
+      this->data3 = 0;
+    }
+    //======================================================
    void MidiApplication::playTrkx()
 {
   
@@ -141,6 +185,7 @@ void MidiApplication::DeleteNtonLoopTrkx()
     }
   }
 }
+//==================================================================
 
 void MidiApplication::recordTrkx()
 {
@@ -197,4 +242,34 @@ void MidiApplication::recordTrkx()
     return;
   }
 }
-//==========members============================
+//=============================================
+  if (this->start_rec_Trkx)
+  {
+    this->record_Trkx();
+  }
+
+
+//==========members .h============================
+float timeTrkx[MAX_NB_TIMES];
+    int commandTrkx[MAX_NB_MIDI_MESSAGES];
+    int data3Trkx[MAX_NB_MIDI_MESSAGES];
+    int data2Trkx[MAX_NB_MIDI_MESSAGES];
+
+    int Store_Vel_Run_ST_Trkx[NT_RUN_MAX];
+    int Store_Vel_Run_NT_Trkx[NT_RUN_MAX];
+
+    bool switch_on_off_trkx = false;
+    unsigned long midiCodeIndexTrkx = 0;
+    bool rec_Trkx_ok = false;
+    bool start_rec_Trkx = false;
+    bool Flag_Send_Trkx = false;
+    bool data_Trkx = false;
+    bool flag_play_Trkx = false;
+    bool play_Trkx_ok = false;
+    bool play_loopTrkx = false;
+    void StoreRuningNoteTrkx();
+    void DeleteNtonLoopTrkx();
+    void record_Trkx();
+    void play_Trkx();
+    //=========================.cpp==========================
+  

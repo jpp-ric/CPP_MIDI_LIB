@@ -54,8 +54,9 @@ void MidiApplication::initArrays()
 {
   for (char iNumData = 0; iNumData < BUTTON_MAX; iNumData++)
   {
-      this->Control_Button[iNumData] = 0;
-  }  
+    this->Control_Button[iNumData] = 0;
+    this->Control_Button_Onlyon[iNumData] = 0;
+  }
 }
 
 void MidiApplication::init()
@@ -137,24 +138,18 @@ void MidiApplication::handleMidiCode()
     this->flag = false;
 
     this->data3 = data;
+    //this->StartStopPlayTrk5();
+    this->StartRecTrack5();
     //============store data2 control change==================
-    /*this->getDisplayer()->display("\r\n");
-    this->getDisplayer()->display(this->command);
-    this->getDisplayer()->display(this->data2);
-    this->getDisplayer()->display(this->data3);
-    */
-    if (this->command == 176 && this->data3 > 0)
+    
+
+    if (this->command == 176 && this->data2 == 3)
     {
-      this->control28 = 28;
-      this->Control_Button[this->data2] = this->data2;
-      //this->getDisplayer()->display("this->command == 176 && this->data3 > 0");
+      this->x_count = (this->data3 * 0.01);
     }
-    if (this->command == 176 && this->data3 == 0)
-    {
-      this->control28 = 0;
-      this->Control_Button[this->data2] = 0;
-      //this->getDisplayer()->display("this->command == 176 && this->data3 == 0");
-    }
+    //===============store control data2===============
+    this->StoreControlData2();
+    //================================================
 
     //===============================================
 
@@ -341,7 +336,7 @@ void MidiApplication::handleNoteOnOffCommand()
   {
     //=========== save this->command ===========
     this->command_tampon = this->command; //save command used in split_kb
-    //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+    
     this->split_kb(); //split keyboard
   }
 
@@ -372,6 +367,11 @@ void MidiApplication::handleNoteOnOffCommand()
   }
 
   //**************************************************************
+  if (this->start_rec_Trk5)
+  {
+
+    this->recordTrk5();
+  }
 
   if (this->isNoteOnOrOffCommandChannel1(this->command_tampon) && this->flag_split)
   {
@@ -442,14 +442,18 @@ void MidiApplication::handleControlChangeCommand()
       this->start_rec_2 = false;
       this->start_rec_3 = false;
       this->start_rec_4 = false;
+      this->start_rec_Trk5 = false;
       //this->Ticks = 0;
       this->play_loop = false;
       this->play_loop2 = false;
       this->play_loop3 = false;
       this->play_loop4 = false;
+      this->play_loop_Trk5 = false;
       this->play_1_ok = false;
       this->play_2_ok = false;
       this->play_3_ok = false;
+      this->play_4_ok = false;
+      this->play_Trk5 = false;
       this->rec_1_ok = false;
       this->data2 = 127;
     }
@@ -467,10 +471,7 @@ void MidiApplication::handleControlChangeCommand()
       this->sendCurrentMidiMessage();
     }
 
-    /*else if (this->data2 == 13) //1) // ******** Level control channel*************
-    {
-      this->BankChange();
-    }*/
+    
     //====================level control current note===================
     else if (this->data2 == 1) // ************* Level control current note *************
     {
@@ -501,7 +502,7 @@ void MidiApplication::handleControlChangeCommand()
       this->prgm_chg_inst(); //instr chang decr
     }
 
-    //===================start record1============================
+    //===================startrec1============================
     else if (this->data2 == 20) // ************* Rec track 1 *************
     {
       //=========reset arrays track 1======================
@@ -533,9 +534,10 @@ void MidiApplication::handleControlChangeCommand()
       return;
     }
 
-    //================start record2==================================
-    else if (this->data2 == 21) // ************* Rec track 2 *************
+    //================startrec2==================================
+    else if (this->Control_Button_Onlyon[21] == 21)  // ************* Rec track 2 *************
     {
+      this->Control_Button_Onlyon[21] = 0;
       if (this->play_loop2)
       {
         this->play_loop2 = false;
@@ -570,9 +572,11 @@ void MidiApplication::handleControlChangeCommand()
       this->data3 = 0;
       //this->Ticks = 0;
     }
-    //=============start reccord3================================
-    else if (this->data2 == 22) // ************* Rec track 3 *************
+    //=============startrec3================================
+    else if (this->Control_Button_Onlyon[22] == 22) // ************* Rec track 3 *************
     {
+      this->Control_Button_Onlyon[22] = 0;
+      //this->getDisplayer()->display("startrec31");
       if (this->play_loop3)
       {
         this->play_loop3 = false;
@@ -608,7 +612,7 @@ void MidiApplication::handleControlChangeCommand()
     }
     //======================================================
 
-    //=============start reccord4================================
+    //=============startrec4================================
     else if (this->Control_Button[13] > 0 && this->Control_Button[28] == 28) // ************* Rec track 4 *************
     {
       //this->getDisplayer()->display("13 ???");
@@ -648,7 +652,7 @@ void MidiApplication::handleControlChangeCommand()
       this->data3 = 0;
     }
     //======================================================
-    //==================start play 1==============================
+    //==================startplay1==============================
     else if (this->data2 == 15) // ************* Switch play "on" *************
     {
       //===========start play 1============
@@ -685,6 +689,14 @@ void MidiApplication::handleControlChangeCommand()
           this->play_4_ok = true;
           this->flag_play_4 = true;
         }
+
+        if (data_Trk5) //if track3 not empty
+        {
+          this->midiCodeIndex_Trk5 = 0;
+          this->data3 = 0;
+          this->play_Trk5 = true;
+          this->flag_Play_Trk5 = true;
+        }
         //==================================
       }
     }
@@ -696,7 +708,7 @@ void MidiApplication::handleControlChangeCommand()
       if (!this->switch_on_off_trk2)
       {
         //this->getDisplayer()->display("play22");
-        //this->midiCodeIndex_3 = 0;
+        
         if (!this->play_loop)
         {
           this->data3 = 0;
@@ -754,11 +766,14 @@ void MidiApplication::handleControlChangeCommand()
         this->DeleteNtonLoopTrack3();
       }
     }
+    //======================start play5===============================
 
     //======================start play 4==============================
-    if (this->Control_Button[28] == 28) //this->control28 == 28)
+    if (this->Control_Button[28] == 28 && this->Control_Button[13] == 0) //this->control28 == 28)
     {
-      //this->Control_Button[28] = 30;
+      //this->getDisplayer()->display("play4on");
+
+      this->Control_Button[28] = 30;
       //this->getDisplayer()->display("this->Control_Button[28] == 28 ;(data3>0)");
       if (!this->switch_on_off_trk4)
       {
@@ -778,11 +793,12 @@ void MidiApplication::handleControlChangeCommand()
         }
       }
     }
-  } //FIN : if (this->data3 > 0)
-//====================stop play4=============================
-  if (this->Control_Button[28] == 0) //this->control28 == 0) //;this->Control_Button[28] == 0)
+  }                                                                   //FIN : if (this->data3 > 0)
+                                                                      //====================stop play4=============================
+  if (this->Control_Button[28] == 0 && this->Control_Button[13] == 0) //this->control28 == 0) //;this->Control_Button[28] == 0)
   {
-    //this->Control_Button[28] == 30;
+    //this->getDisplayer()->display("play4off");
+    this->Control_Button[28] == 30;
     this->control28 = 23;
     //this->getDisplayer()->display("this->Control_Button[28] == 0");
     if (this->switch_on_off_trk4)
@@ -806,6 +822,7 @@ void MidiApplication::handleControlChangeCommand()
     }
   }
   //==========================================================
+  this->StartStopPlayTrk5();
 }
 
 //*********************************************************************
@@ -867,10 +884,10 @@ void MidiApplication::sendProgramChange()
 //**************************record 1****************************************
 void MidiApplication::record_1()
 {
+
   if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES) //check max array
   {
-    //if (this->data2 != 96) //wait for the 1st note from keyboard
-    //{
+
     //************switch start init *****************
     if (this->rec_1_ok) //switch of the first note = "on"
     {
@@ -908,27 +925,49 @@ void MidiApplication::record_1()
     // }
   }
 }
-//**************************record 2****************************************
+//************************** record2 ****************************************
 void MidiApplication::record_2()
 {
-  this->getDisplayer()->display("rec2");
+  //this->getDisplayer()->display("rec2");
   if (this->midiCodeIndex_2 < MAX_NB_MIDI_MESSAGES) //check max array
   {
     if (this->rec_2_ok) //switch of the first note = "on"
     {
 
       //===========init on firt note=============
-      this->data_trk_2 = true;
+      //this->data_trk_2 = true;
       this->rec_2_ok = false;    //turn switch "off"
       this->midiCodeIndex_2 = 0; //reset index track 2
-      this->midiCodeIndex_1 = 0; //reset index track 1
-      this->Ticks = 0;           //reset ticks
+      this->midiCodeIndex_1 = 0;
+      this->midiCodeIndex_3 = 0;
+      this->midiCodeIndex_4 = 0;
+      this->midiCodeIndex_Trk5 = 0;
+      this->Ticks = 0; //reset ticks
       this->start_rec_2 = true;
       if (this->play_loop)
       {
-        this->DeleteNtonLoopTrack1();
-        this->DeleteNtonLoopTrack3();
-        this->DeleteNtonLoopTrack4();
+        if (this->data_trk_1)
+        {
+          this->DeleteNtonLoopTrack1();
+        }
+        if (this->data_trk_2)
+        {
+          this->DeleteNtonLoopTrack2();
+        }
+        if (this->data_trk_3)
+        {
+          this->DeleteNtonLoopTrack3();
+        }
+        if (this->data_trk_4)
+        {
+          this->DeleteNtonLoopTrack4();
+        }
+        if (this->data_Trk5)
+        {
+          this->DeleteNtonLoopTrk5();
+        }
+
+        
         this->play_1(); //start play track 1
       }
       //======================================
@@ -957,6 +996,10 @@ void MidiApplication::record_2()
     //==========store data mid==================
     if (start_rec_2)
     {
+      if (!this->data_trk_2)
+      {
+        this->data_trk_2 = true;
+      }
       //this->getDisplayer()->display(this->Ticks);
       this->time2s[this->midiCodeIndex_2] = this->Ticks;
       this->command2s[this->midiCodeIndex_2] = this->command;
@@ -969,28 +1012,48 @@ void MidiApplication::record_2()
     }
   }
 }
-//**************************record 3****************************************
+//************************** record3 ****************************************
 void MidiApplication::record_3()
 {
 
-  this->getDisplayer()->display("rec3");
+  this->getDisplayer()->display("record31");
   if (this->rec_3_ok) //switch of the first note = "on"
   {
     //===========init on firt note=============
-    //this->getDisplayer()->display("rec3");
-    this->data_trk_3 = true;
+    this->getDisplayer()->display("rec32");
+    //this->data_trk_3 = true;
     this->rec_3_ok = false; //turn switch "off"
     this->midiCodeIndex_1 = 0;
     this->midiCodeIndex_2 = 0; //reset index track 2
-    this->midiCodeIndex_3 = 0; //reset index track 1
-    this->Ticks = 0;           //reset ticks
+    this->midiCodeIndex_3 = 0;
+    this->midiCodeIndex_4 = 0;
+    this->midiCodeIndex_Trk5 = 0;
+    this->Ticks = 0; //reset ticks
     this->start_rec_3 = true;
 
     if (this->play_loop)
     {
-      this->DeleteNtonLoopTrack1();
-      this->DeleteNtonLoopTrack2();
-      this->DeleteNtonLoopTrack4();
+      if (this->data_trk_1)
+      {
+        this->DeleteNtonLoopTrack1();
+      }
+      if (this->data_trk_2)
+      {
+        this->DeleteNtonLoopTrack2();
+      }
+      if (this->data_trk_3)
+      {
+        this->DeleteNtonLoopTrack3();
+      }
+      if (this->data_trk_4)
+      {
+        this->DeleteNtonLoopTrack4();
+      }
+      if (this->data_Trk5)
+      {
+        this->DeleteNtonLoopTrk5();
+      }
+
       this->play_1(); //start play track 1
     }
     //======================================
@@ -999,6 +1062,8 @@ void MidiApplication::record_3()
   {
     if (this->data2 == 37 && this->data3 > 0 && this->start_rec_3) //start loop on nt 37
     {
+
+      this->data_trk_3 = true;
 
       this->flag_play_3 = true;
       this->Flag_Send_trk3 = true;
@@ -1016,7 +1081,11 @@ void MidiApplication::record_3()
   //==========store data mid==================
   if (start_rec_3)
   {
-    //this->getDisplayer()->display("rec3");
+    if (!this->data_trk_3)
+    {
+      this->data_trk_3 = true;
+    }
+    this->getDisplayer()->display("rec33");
     this->time3s[this->midiCodeIndex_3] = this->Ticks;
     this->command3s[this->midiCodeIndex_3] = this->command;
     this->command3s[this->midiCodeIndex_3 + 1] = 0; //put 0 in index array + 1
@@ -1028,28 +1097,46 @@ void MidiApplication::record_3()
     return;
   }
 }
-//==============record 4====================================
+//==============rec4====================================
 void MidiApplication::record_4()
 {
-  this->getDisplayer()->display("rec4");
+  //this->getDisplayer()->display("rec4");
   if (this->rec_4_ok) //switch of the first note = "on"
   {
     //===========init on firt note=============
     //this->getDisplayer()->display("rec3");
-    this->data_trk_4 = true;
+    //this->data_trk_4 = true;
     this->rec_4_ok = false; //turn switch "off"
     this->midiCodeIndex_1 = 0;
     this->midiCodeIndex_2 = 0; //reset index track 2
     this->midiCodeIndex_3 = 0;
     this->midiCodeIndex_4 = 0;
+    this->midiCodeIndex_Trk5 = 0;
     this->Ticks = 0; //reset ticks
     this->start_rec_4 = true;
 
     if (this->play_loop)
     {
-      this->DeleteNtonLoopTrack1();
-      this->DeleteNtonLoopTrack3();
-      this->DeleteNtonLoopTrack2();
+      if (this->data_trk_1)
+      {
+        this->DeleteNtonLoopTrack1();
+      }
+      if (this->data_trk_2)
+      {
+        this->DeleteNtonLoopTrack2();
+      }
+      if (this->data_trk_3)
+      {
+        this->DeleteNtonLoopTrack3();
+      }
+      if (this->data_trk_4)
+      {
+        this->DeleteNtonLoopTrack4();
+      }
+      if (this->data_Trk5)
+      {
+        this->DeleteNtonLoopTrk5();
+      }
       this->play_1(); //start play track 1
     }
     //======================================
@@ -1058,7 +1145,7 @@ void MidiApplication::record_4()
   {
     if (this->data2 == 37 && this->data3 > 0 && this->start_rec_4) //start loop on nt 37
     {
-
+      this->data_trk_4 = true;
       this->flag_play_4 = true;
       this->Flag_Send_trk4 = true;
       //this->getDisplayer()->display("rec2");
@@ -1075,6 +1162,10 @@ void MidiApplication::record_4()
   //==========store data mid==================
   if (start_rec_4)
   {
+    if (!this->data_trk_4)
+    {
+      this->data_trk_4 = true;
+    }
     //this->getDisplayer()->display("rec3");
     this->time4s[this->midiCodeIndex_4] = this->Ticks;
     this->command4s[this->midiCodeIndex_4] = this->command;
@@ -1101,63 +1192,85 @@ void MidiApplication::play_1()
     //this->getDisplayer()->display(this->midiCodeIndex_1);
     if (this->Ticks >= this->time1s[this->midiCodeIndex_1])
     {
-      //this->data_trk_1 = true;
+      
       //this->getDisplayer()->display("play_1");
       if (this->data21s[this->midiCodeIndex_1] == 98) //rebouclage
 
       {
         //===stop rec/start syncro loop======================
-        if (this->start_rec_2)
+        if (this->start_rec_2 && this->data_trk_2)
         {
           this->command2s[this->midiCodeIndex_2 + 1] = 0;
           this->start_rec_2 = false;
           this->Flag_Send_trk2 = false;
           this->play_2_ok = true;
         }
-        if (this->start_rec_3)
+        if (this->start_rec_3 && this->data_trk_3)
         {
           this->command3s[this->midiCodeIndex_3 + 1] = 0;
           this->start_rec_3 = false;
           this->Flag_Send_trk3 = false;
           this->play_3_ok = true;
         }
-        if (this->start_rec_4)
+        if (this->start_rec_4 && this->data_trk_4)
         {
           this->command4s[this->midiCodeIndex_4 + 1] = 0;
           this->start_rec_4 = false;
           this->Flag_Send_trk4 = false;
           this->play_4_ok = true;
         }
+        if (this->start_rec_Trk5 && data_Trk5)
+        {
+          this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;
+          this->start_rec_Trk5 = false;
+          this->Flag_Send_Trk5 = false;
+          this->play_Trk5 = true;
+        }
         //============================================================
         //this->getDisplayer()->display("play_1");
         if (this->data_trk_2 && !this->start_rec_2)
         {
+          this->DeleteNtonLoopTrack2();
           if (this->start_sync)
           {
             this->play_2_ok = true;
             this->flag_play_2 = true;
             this->Flag_Send_trk2 = true;
-            this->DeleteNtonLoopTrack2();
+            
           }
         }
         if (this->data_trk_3 && !this->start_rec_3)
         {
+          this->DeleteNtonLoopTrack3();
           if (this->start_sync)
           {
             this->play_3_ok = true;
             this->flag_play_3 = true;
             this->Flag_Send_trk3 = true;
-            this->DeleteNtonLoopTrack3();
+            
           }
         }
         if (this->data_trk_4 && !this->start_rec_4)
         {
+          this->DeleteNtonLoopTrack4();
           if (this->start_sync)
-          {
+          {            
             this->play_4_ok = true;
             this->flag_play_4 = true;
             this->Flag_Send_trk4 = true;
-            this->DeleteNtonLoopTrack4();
+            
+          }
+        }
+
+        if (this->data_Trk5 && !this->start_rec_Trk5)
+        {
+          if (this->start_sync)
+          {
+            this->DeleteNtonLoopTrk5();
+            this->play_Trk5 = true;
+            this->flag_Play_Trk5 = true;
+            this->Flag_Send_Trk5 = true;
+            
           }
         }
 
@@ -1166,10 +1279,12 @@ void MidiApplication::play_1()
         this->midiCodeIndex_2 = 0;
         this->midiCodeIndex_3 = 0;
         this->midiCodeIndex_4 = 0;
+        this->midiCodeIndex_Trk5 = 0;
+
+        
         return;
       }
-      //if (this->flag_play_1)
-      //{
+      
 
       this->sendMidiMessage(this->command1s[this->midiCodeIndex_1],
                             this->data21s[this->midiCodeIndex_1],
@@ -1181,7 +1296,7 @@ void MidiApplication::play_1()
         this->play_1_ok = false;
       }
       this->midiCodeIndex_1 += 1;
-      //}
+      
     }
   }
   return;
@@ -1211,7 +1326,7 @@ void MidiApplication::play_2()
       }
 
       //this->getDisplayer()->display("play_222");
-      if (this->Flag_Send_trk2)
+      if (this->Flag_Send_trk2 && this->data_trk_2)
       {
         this->sendMidiMessage(this->command2s[this->midiCodeIndex_2],
                               this->data22s[this->midiCodeIndex_2],
@@ -1254,7 +1369,7 @@ void MidiApplication::play_3()
         return;
       }
       //this->getDisplayer()->display("play_2");
-      if (this->Flag_Send_trk3)
+      if (this->Flag_Send_trk3 && this->data_trk_3)
       {
         this->sendMidiMessage(this->command3s[this->midiCodeIndex_3],
                               this->data23s[this->midiCodeIndex_3],
@@ -1300,7 +1415,7 @@ void MidiApplication::play_4()
         return;
       }
       //this->getDisplayer()->display("play_2");
-      if (this->Flag_Send_trk4)
+      if (this->Flag_Send_trk4 && this->data_trk_4)
       {
         this->sendMidiMessage(this->command4s[this->midiCodeIndex_4],
                               this->data24s[this->midiCodeIndex_4],
@@ -1315,6 +1430,7 @@ void MidiApplication::play_4()
         this->Ticks = 0;
         this->midiCodeIndex_4 = 0;
         //this->play_2_ok = false;
+        this->StoreRuningNoteTrk4();
         return;
       }
       this->midiCodeIndex_4 += 1;
@@ -1485,25 +1601,14 @@ void MidiApplication::StoreRuningNoteTrk3()
     this->Store_Vel_Run_ST_Track3[this->data23s[this->midiCodeIndex_3]] = 0;
   }
 }
-//===========calculate current channel number note on========================
-// int MidiApplication::GetCurrentChannelNumberNoteon(int command)
-// {
-//   if (this->command > 143 && this->command < 160)
-//   {
 
-//     this->CurrentChannelNumberNote = this->command - 143;
-//   }
-//   else
-//   {
-//     return;
-//   }
-// }
 
 void MidiApplication::Inst_ChgCh1()
 {
+  //this->getDisplayer()->display(this->data2);
   if (this->data2 == 12)
   {
-    if (this->inst1 < 1)
+    if (this->inst1 < 128)
     {
       this->inst1 += 1;
     }
@@ -1516,7 +1621,7 @@ void MidiApplication::Inst_ChgCh1()
     }
   }
   this->inst = this->inst1;
-  //this->getDisplayer()->display(this->command);
+
   this->sendProgramChange();
 }
 void MidiApplication::Inst_ChgCh2()
@@ -1535,7 +1640,7 @@ void MidiApplication::Inst_ChgCh2()
       this->inst2 -= 1;
     }
   }
-  this->getDisplayer()->display(this->command);
+  //this->getDisplayer()->display(this->command);
   this->inst = this->inst2;
   this->sendProgramChange();
 }
@@ -1774,3 +1879,299 @@ void MidiApplication::BankChg()
   this->data3 = tampon1;
   this->command = tampon3;
 }
+//==============================================================
+//==============store data2 control change==================================
+void MidiApplication::StoreControlData2()
+{
+  if (this->command == 176 && this->data3 > 0)
+  {
+    this->control28 = 28;
+    this->Control_Button[this->data2] = this->data2;
+    this->Control_Button_Onlyon[this->data2] = this->data2;
+
+    //this->getDisplayer()->display("this->command == 176 && this->data3 > 0");
+  }
+  if (this->command == 176 && this->data3 == 0)
+  {
+    this->control28 = 0;
+    this->Control_Button[this->data2] = 0;
+    //this->getDisplayer()->display("this->command == 176 && this->data3 == 0");
+  }
+}
+//===================================================
+void MidiApplication::StartStopPlayTrk5()
+{
+  this->getDisplayer()->display(this->data2);
+  //======================startplay5==============================
+  if (this->Control_Button[29] == 29 && this->Control_Button[13] == 0) //this->control28 == 28)
+  {
+    this->Control_Button[29] = 30;
+    if (!this->switch_on_off_Trk5)
+    {
+      if (!this->play_loop)
+      {
+        this->data3 = 0;
+        this->play_Trk5 = true;
+        this->flag_Play_Trk5 = true;
+        this->Flag_Send_Trk5 = true;
+        this->switch_on_off_Trk5 = true;
+        this->play_loop_Trk5 = true;
+      }
+      else
+      {
+
+        this->Flag_Send_Trk5 = true;
+        this->switch_on_off_Trk5 = true;
+      }
+    }
+  }
+  //====================stopplay5=============================
+  if (this->Control_Button[29] == 0 && this->Control_Button[13] == 0) //this->control28 == 0) //;this->Control_Button[28] == 0)
+  {
+    this->Control_Button[29] = 30;
+    if (this->switch_on_off_Trk5)
+    {
+      if (!this->play_loop)
+      {
+        this->data3 = 0;
+        this->play_Trk5 = false;
+        this->flag_Play_Trk5 = false;
+        this->Flag_Send_Trk5 = false;
+        this->switch_on_off_Trk5 = false;
+        this->play_loop_Trk5 = false;
+      }
+      else
+      {
+        this->switch_on_off_Trk5 = false;
+
+        this->Flag_Send_Trk5 = false;
+      }
+      this->DeleteNtonLoopTrk5();
+    }
+  }
+} //========================play5==============================================
+
+void MidiApplication::playTrk5()
+{
+
+  if (this->midiCodeIndex_Trk5 < MAX_NB_MIDI_MESSAGES && this->data_Trk5)
+  {
+    if (this->Ticks >= this->timeTrk5[this->midiCodeIndex_Trk5])
+    {
+      if (this->data2Trk5[this->midiCodeIndex_Trk5] == 98) //rebouclage
+
+      {
+
+        this->start_rec_Trk5 = false;
+        this->Ticks = 0;
+        this->midiCodeIndex_Trk5 = 0;
+
+        this->DeleteNtonLoopTrk5();
+
+        return;
+      }
+
+      if (this->Flag_Send_Trk5 && this->data_Trk5)
+      {
+        this->sendMidiMessage(this->commandTrk5[this->midiCodeIndex_Trk5],
+                              this->data2Trk5[this->midiCodeIndex_Trk5],
+                              this->data3Trk5[this->midiCodeIndex_Trk5]);
+      }
+      this->StoreRuningNoteTrk5(); //store runing note/delete note "off"
+
+      if (this->commandTrk5[this->midiCodeIndex_Trk5] == 0 && !this->play_loop)
+      {
+
+        this->Ticks = 0;
+        this->midiCodeIndex_Trk5 = 0;
+        //this->play_2_ok = false;
+        return;
+      }
+      this->midiCodeIndex_Trk5 += 1;
+    }
+  }
+} //====================rec5====================================
+void MidiApplication::recordTrk5()
+{
+
+  if (this->rec_Trk5_ok) //switch of the first note = "on"
+  {
+
+    //===========init on firt note=============
+    //this->getDisplayer()->display("rec3");
+    //this->data_Trk5 = true;
+    this->rec_Trk5_ok = false; //turn switch "off"
+    this->midiCodeIndex_1 = 0;
+    this->midiCodeIndex_2 = 0; //reset index track 2
+    this->midiCodeIndex_3 = 0;
+    this->midiCodeIndex_4 = 0;
+    this->midiCodeIndex_Trk5 = 0;
+    this->Ticks = 0; //reset ticks
+    this->start_rec_Trk5 = true;
+
+    if (this->play_loop)
+    {
+      if (this->data_trk_1)
+      {
+        this->DeleteNtonLoopTrack1();
+      }
+      if (this->data_trk_2)
+      {
+        this->DeleteNtonLoopTrack2();
+      }
+      if (this->data_trk_3)
+      {
+        this->DeleteNtonLoopTrack3();
+      }
+      if (this->data_trk_4)
+      {
+        this->DeleteNtonLoopTrack4();
+      }
+      if (this->data_Trk5)
+      {
+        this->DeleteNtonLoopTrk5();
+      }
+      this->play_1(); //start play track 1
+    }
+
+    //======================================
+  }
+  if (!this->play_loop)
+  {
+    if (this->data2 == 37 && this->data3 > 0 && this->start_rec_Trk5) //start loop on nt 37
+    {
+      this->data_Trk5 = true;
+      this->flag_Play_Trk5 = true;
+      this->Flag_Send_Trk5 = true;
+
+      this->timeTrk5[this->midiCodeIndex_Trk5] = this->Ticks;
+      this->data2Trk5[this->midiCodeIndex_Trk5] = 98;
+      this->start_rec_Trk5 = false; //locking this
+      this->play_Trk5 = true;       //switch play track 1
+      this->midiCodeIndex_Trk5 = 0; //index array reset
+      this->Ticks = 0;              //ticks reset
+
+      return;
+    }
+  }
+  //==========store data mid==================
+  if (start_rec_Trk5)
+  {
+    if (!this->data_Trk5)
+    {
+      this->data_Trk5 = true;
+    }
+
+    //this->getDisplayer()->display("rec3");
+    this->timeTrk5[this->midiCodeIndex_Trk5] = this->Ticks;
+    this->commandTrk5[this->midiCodeIndex_Trk5] = this->command;
+    this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
+    this->data2Trk5[this->midiCodeIndex_Trk5] = this->data2;
+    this->data2Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
+    this->data3Trk5[this->midiCodeIndex_Trk5] = this->data3;
+    this->data3Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
+    this->midiCodeIndex_Trk5 += 1;
+    return;
+  }
+}
+
+//==================startrec5============================
+void MidiApplication::StartRecTrack5()
+{
+
+  if (this->Control_Button_Onlyon[13] == 13 && this->Control_Button_Onlyon[29] == 29) // ************* Rec track 4 *************
+  {
+    this->Control_Button_Onlyon[13] = 0;
+    this->Control_Button_Onlyon[29] = 0;
+    this->Control_Button[29] = 30;
+    if (this->play_loop_Trk5)
+    {
+      this->play_loop_Trk5 = false;
+      this->play_Trk5 = false;
+      this->Flag_Send_Trk5 = false;
+      this->DeleteNtonLoopTrk5();
+    }
+
+    this->data_Trk5 = false;
+    this->start_rec_Trk5 = true;
+    this->rec_1_ok = false;
+    this->rec_2_ok = false;
+    this->rec_3_ok = false;
+    this->rec_4_ok = false;
+    //int i = 0;
+    //=============reset arrays track 3=========================
+    for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
+    {
+      this->commandTrk5[i] = 0;
+      this->timeTrk5[i] = 0;
+      this->data2Trk5[i] = 0;
+      this->data3Trk5[i] = 0;
+    }
+    //=========init array "delete nt off track 2"==================
+    for (int i = 0; i < 100; i++)
+    {
+      this->Store_Vel_Run_NT_Trk5[i] = 0;
+      this->Store_Vel_Run_ST_Trk5[i] = 0;
+    }
+    //================================================
+    this->rec_Trk5_ok = true;
+
+    this->midiCodeIndex_Trk5 = 0;
+    this->data3 = 0;
+  }
+}
+//====================================================================
+//========store on note"on"/delete on note "off"============
+
+void MidiApplication::StoreRuningNoteTrk5()
+{
+  if (!this->isNoteOffCommand(this->commandTrk5[this->midiCodeIndex_Trk5]))
+  {
+    this->Store_Vel_Run_NT_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] =
+        this->data2Trk5[this->midiCodeIndex_Trk5];
+
+    this->Store_Vel_Run_ST_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = this->commandTrk5[this->midiCodeIndex_Trk5] - 16; //-16 = turn in "note off"
+  }
+  else
+  {
+    this->Store_Vel_Run_NT_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = 0;
+    this->Store_Vel_Run_ST_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = 0;
+  }
+}
+//==================================================================
+void MidiApplication::DeleteNtonLoopTrk5()
+{
+  int indexDel = 0;
+  for (indexDel = 0; indexDel < 100; indexDel++)
+  {
+    if (this->Store_Vel_Run_NT_Trk5[indexDel] > 0)
+    {
+      this->midiStream->write(Store_Vel_Run_ST_Trk5[indexDel]);
+      this->midiStream->write(this->Store_Vel_Run_NT_Trk5[indexDel]);
+      this->midiStream->write(1);
+      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track2[indexDel]);
+    }
+  }
+}
+//===================flashing led=========================
+void MidiApplication::FlashingLed()
+{
+
+  if (this->Interval_LedRec >= 1000000)
+  {
+
+    if (!this->TimerLed)
+    {
+
+      this->TimerLed = true;
+    }
+    else if (this->TimerLed)
+    {
+
+      this->TimerLed = false;
+    }
+    this->Interval_LedRec = 0;
+  }
+  this->Interval_LedRec += 1;
+}
+//============================================================
