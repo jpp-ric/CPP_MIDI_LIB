@@ -18,7 +18,7 @@
 #define BANK2 37
 #define BANK3 38
 #define BANK4 39
-
+#define BUTTON_MAX 35
 // #define STATUS_INTERVAL NB_CHANNELS - 1
 
 
@@ -31,6 +31,7 @@ public:
     ~MidiApplication();
 
     void init();
+    void initArrays();
     IMidiStream *getMidiStream();
 
     void handleMidiCode();
@@ -39,51 +40,82 @@ public:
     void play_1();
     void play_2();
     void play_3();
+    void play_4();
+    void StartStopPlayTrk5();
+    void playTrk5();
+    void StartRecTrack5();
     void record_1();
     void record_2();
     void record_3();
+    void record_4();
+    void recordTrk5();
     void DeleteNtonLoopTrack1();
     void StoreRuningNoteTrk1();
     void DeleteNtonLoopTrack2();
     void StoreRuningNoteTrk2();
     void DeleteNtonLoopTrack3();
     void StoreRuningNoteTrk3();
-   
+    void StoreRuningNoteTrk4();
+    void DeleteNtonLoopTrack4();
+    void StoreRuningNoteTrk5();
+    void DeleteNtonLoopTrk5();
+    void FlashingLed();
+    
 
     //--- Déclaration des membres public --- (à éviter ! si pas nécessaire mettre en private)
     bool Bang = false;
     bool play_loop = false;
     bool play_loop2 = false; 
     bool play_loop3 = false;
+    bool play_loop4 = false;
+    bool play_loop_Trk5 = false;
+    bool TimerLedOff = false; 
+    bool TimerLed = false;  
+
 
     bool play_1_ok = false;
     bool play_2_ok = false;
     bool play_3_ok = false;
+    bool play_4_ok = false;
+    bool play_Trk5 = false;
+
     bool flag_play_1 = false;
     bool flag_play_2 = false;
     bool flag_play_3 = false;
+    bool flag_play_4 = false;
+    bool flag_Play_Trk5 = false;
     bool data_trk_1 = false;
     bool data_trk_2 = false;
     bool data_trk_3 = false;
+    bool data_trk_4 = false;
+    bool data_Trk5 = false;
     bool start_sync = false;
     bool Flag_Send_trk3 = false;//flag on/off send midi code sync
     bool Flag_Send_trk2 = false;//flag on/off send midi code sync
+    bool Flag_Send_trk4 = false;
+    bool Flag_Send_Trk5 = false;
 
     bool start_rec_1 = false;
     bool start_rec_2 = false;
     bool start_rec_3 = false;
-    bool data_rec_2_ok = false;
+    bool start_rec_4 = false;
+    bool start_rec_Trk5 = false;
+    //bool data_rec_2_ok = false;
     bool rec_1_ok = false;
     bool rec_2_ok = false;
     bool rec_3_ok = false;
+    bool rec_4_ok = false;
+    bool rec_Trk5_ok = false;
     float i_count = 0.;
     float i_count_2 = 0.;
     float x_count = 0.1;
-    bool flag_trk_2 = false;
+    //bool flag_trk_2 = false;
     unsigned long midiCodeIndex_1 = 0;
     unsigned long midiCodeIndex_2 = 0;
     unsigned long midiCodeIndex_3 = 0;
-    volatile unsigned long Ticks = 0; // use volatile for shared variables
+    unsigned long midiCodeIndex_4 = 0;
+    unsigned long midiCodeIndex_Trk5 = 0;
+    float  Ticks = 0.; // ticks horloge
     
 
     float time1s[MAX_NB_TIMES];
@@ -95,12 +127,22 @@ public:
     int command2s[MAX_NB_MIDI_MESSAGES];
     int data32s[MAX_NB_MIDI_MESSAGES];
     int data22s[MAX_NB_MIDI_MESSAGES];
-    int note_runing_tr2[NB_RUNNING_NOTES];
+    
 
     float time3s[MAX_NB_TIMES];
     int command3s[MAX_NB_MIDI_MESSAGES];
     int data33s[MAX_NB_MIDI_MESSAGES];
     int data23s[MAX_NB_MIDI_MESSAGES];
+
+    float time4s[MAX_NB_TIMES];
+    int command4s[MAX_NB_MIDI_MESSAGES];
+    int data34s[MAX_NB_MIDI_MESSAGES];
+    int data24s[MAX_NB_MIDI_MESSAGES];
+
+    float timeTrk5[MAX_NB_TIMES];
+    int commandTrk5[MAX_NB_MIDI_MESSAGES];
+    int data3Trk5[MAX_NB_MIDI_MESSAGES];
+    int data2Trk5[MAX_NB_MIDI_MESSAGES];
 
     int Store_Vel_Run_NT_Track1[NT_RUN_MAX];
     int Store_Vel_Run_ST_Track1[NT_RUN_MAX];
@@ -108,7 +150,17 @@ public:
     int Store_Vel_Run_ST_Track2[NT_RUN_MAX];
     int Store_Vel_Run_NT_Track3[NT_RUN_MAX];
     int Store_Vel_Run_ST_Track3[NT_RUN_MAX];
+    int Store_Vel_Run_NT_Track4[NT_RUN_MAX];
+    int Store_Vel_Run_ST_Track4[NT_RUN_MAX];
+    int Store_Vel_Run_ST_Trk5[NT_RUN_MAX];
+    int Store_Vel_Run_NT_Trk5[NT_RUN_MAX];
     int X_velocitych1[NT_RUN_MAX];
+    int Control_Button[BUTTON_MAX];
+    int Control_Button_Onlyon[BUTTON_MAX];
+    
+
+    void StoreControlData2();
+
 
 private:
     //--- Déclaration des Méthodes private ---
@@ -124,6 +176,7 @@ private:
     int getProgramChangeCommandForChannel(int channel);
 
     int getCommandChannel(int command);
+    int Interval_LedRec = 0;
 
     bool isNoteOffCommand();
     bool isNoteOffCommand(int command);
@@ -162,9 +215,7 @@ private:
 
     void split_kb();
     void BankChg();
-    void store_nt_on_trk2();
-    void turn_off_nt_trk2();
-
+    
     //--- Déclaration des Membres private ---
     Track* track1 = 0;
     IMidiStream* midiStream = 0;
@@ -186,6 +237,7 @@ private:
     int inst_1 = 1;
     int inst_2 = 1;
     int data2ControlChg = 0;
+    int control28 = 0;
 
     bool switch_split = false;
     bool flag_split = false;
@@ -208,6 +260,8 @@ private:
     bool switch_on_off_trk1 = false;
     bool switch_on_off_trk2 = false;
     bool switch_on_off_trk3 = false;
+    bool switch_on_off_trk4 = false;
+    bool switch_on_off_Trk5 = false;
 
     
 };
