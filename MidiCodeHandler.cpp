@@ -68,8 +68,11 @@ MidiMessage* MidiCodeHandler::getMidiMessage()
 
 void MidiCodeHandler::destroyMidiMessage()
 {
-    delete this->midiMessage;
-    this->midiMessage = 0;
+    if (this->midiMessage!=0)
+    {
+        delete this->midiMessage;
+        this->midiMessage = 0;
+    }
 }
 
 
