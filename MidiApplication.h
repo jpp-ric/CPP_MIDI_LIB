@@ -73,12 +73,12 @@ public:
     void ConvertStatNotetoStatControl();
     
     void RecMidiMerger();
-    this->StoreDataTrk1();
-    this->StoreDataTrk2();
-    this->StoreDataTrk3();
-    this->StoreDataTrk4();
-    this->StoreDataTrk5();
-    this->StoreDataTrk6();
+    void StoreDataTrk1();
+    void StoreDataTrk2();
+    void StoreDataTrk3();
+    void StoreDataTrk4();
+    void StoreDataTrk5();
+    void StoreDataTrk6();
 
     //void Channel1Bank3();
      
@@ -202,8 +202,8 @@ public:
     int Store_Vel_Run_NT_TrkMg[NT_RUN_MAX];
     int Store_Vel_Run_ST_TrkMg[NT_RUN_MAX];
 
-    int Store_Vel_Run_NT_Trk6[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Trk6[NT_RUN_MAX];
+   
+  
     int Store_Vel_Run_NT_Track1[NT_RUN_MAX];
     int Store_Vel_Run_ST_Track1[NT_RUN_MAX];
     int Store_Vel_Run_NT_Track2[NT_RUN_MAX];
