@@ -1,0 +1,40 @@
+#ifndef MidiMessageProgramChange_h
+#define MidiMessageProgramChange_h
+
+#include <MidiMessage.h>
+
+#define MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL 192
+#define MIDI_STATUS_PROGRAM_CHANGE_LAST_CANAL MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL + NB_CHANNELS - 1
+
+
+class MidiMessageProgramChange: virtual public MidiMessage
+{
+public:
+    //--- Déclaration des Méthodes public ---
+    MidiMessageProgramChange(
+        int midiStatus=UNDEFINED_MIDI_CODE,
+        int data1=UNDEFINED_MIDI_CODE, 
+        int data2=UNDEFINED_MIDI_CODE
+    ); //Constructeur
+        
+    static bool isMidiStatusValid(int midiStatus);
+
+   
+    //--- Déclaration des membres public --- (à éviter)
+
+protected:
+    //--- Déclaration des Méthodes protected ---
+    int getFirstCanalMidiStatus();
+    char getMaxNbMidiCodes();
+
+    //--- Déclaration des membres protected ---
+ 
+private:
+
+    //--- Déclaration des Méthodes private ---
+
+    //--- Déclaration des membres private ---
+
+};
+
+#endif
