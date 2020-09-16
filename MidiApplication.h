@@ -8,9 +8,12 @@
 #define NB_RUNNING_NOTES 100
 #define NT_RUN_MAX 100
 
+
 #define STAT_CONTL_CHG MIDI_STATUS_CONTROL_CHANGE_FIRST_CANAL - 1
 #define STAT_PRG_CHG MIDI_STATUS_PROGRAM_CHANGE_FIRST_CANAL - 1
 
+#define LED_MERGE 125000
+#define LED_NORMAL 1000000
 #define LEVEL_NUMBER 7
 #define REVERB_NUMBER 91
 #define BANK1 36
@@ -36,6 +39,8 @@ public:
     void handleMidiCode();
     void setDisplayer(IDisplayer* displayer);
     void Metronome();
+    void Turnoffallchannels();
+    void sendMidiMessageMg(int command,int data2,int data3);
 
     void play_1();
     void play_2();
@@ -45,6 +50,7 @@ public:
     void StartStopPlayTrk5();
     void playTrk5();
     void StartRecTrack5();
+    void startlooptrk5();
     void StartStopPlayTrk6();
     void playTrk6();
     void StartRecTrk6();
@@ -71,7 +77,10 @@ public:
     void ControlChange();
     void FlashingLed();
     void ConvertStatNotetoStatControl();
-    
+
+    void StoreDataTrk5Mg();
+    void StoreDataTrk5_2Mg();
+
     void RecMidiMerger();
     void StoreDataTrk1();
     void StoreDataTrk2();
@@ -94,7 +103,11 @@ public:
     bool play_loop_Trk6 = false;
     bool TimerLedOff = false; 
     bool TimerLed = false;  
-
+    bool SwitchInTrk5b=true;
+    bool SwitchOutTrk1=false;
+    bool SwitchInTrk5=false;
+    bool SwitchOutTrk2=false;
+    bool SwitchInTrk5_2=false;
 
     bool play_1_ok = false;
     bool play_2_ok = false;
@@ -102,7 +115,8 @@ public:
     bool play_4_ok = false;
     bool play_Trk5 = false;
     bool play_Trk6 = false;
-
+    bool first1 = true;
+    bool MergePlay1 =false; 
     bool flag_play_1 = false;
     bool flag_play_2 = false;
     bool flag_play_3 = false;
@@ -151,14 +165,14 @@ public:
     
     float x_count = 0.1;
     
-    unsigned long midiCodeIndex_1 = 0;
-    unsigned long midiCodeIndex_2 = 0;
-    unsigned long midiCodeIndex_3 = 0;
-    unsigned long midiCodeIndex_4 = 0;
-    unsigned long midiCodeIndex_Trk5 = 0;
-    unsigned long midiCodeIndexTrk6 = 0;
+    unsigned short midiCodeIndex_1 = 0;
+    unsigned short midiCodeIndex_2 = 0;
+    unsigned short midiCodeIndex_3 = 0;
+    unsigned short midiCodeIndex_4 = 0;
+    unsigned short int midiCodeIndex_Trk5 = 0;
+    unsigned short midiCodeIndex_Trk6 = 0;
     float  Ticks = 0.; // ticks horloge
-    float  TicksTrk6 = 0.; // ticks horloge track merge
+    float  TicksTrk5 = 0.; // ticks horloge track merge
     float measure = 0.;
     float beat1 = 1. ;
    
@@ -184,10 +198,10 @@ public:
     int data34s[MAX_NB_MIDI_MESSAGES];
     int data24s[MAX_NB_MIDI_MESSAGES];
 
-    float timeTrk5[MAX_NB_TIMES];
-    int commandTrk5[MAX_NB_MIDI_MESSAGES];
-    int data3Trk5[MAX_NB_MIDI_MESSAGES];
-    int data2Trk5[MAX_NB_MIDI_MESSAGES];
+    float timeTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int commandTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int data3Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
 
     float timeTrk6[MAX_NB_TIMES];
     int commandTrk6[MAX_NB_MIDI_MESSAGES];
@@ -231,14 +245,14 @@ private:
     bool isNoteOnOrOffCommandChannel1(int command);
     void setCommandChannel();
    
-
+    unsigned int SpeedLed13=1000000;
     int getNoteOffCommandForChannel(int channel);
     int getNoteOnCommandForChannel(int channel);
     int getControlChangeCommandForChannel(int channel);
     int getProgramChangeCommandForChannel(int channel);
 
     int getCommandChannel(int command);
-    int Interval_LedRec = 0;
+    unsigned int Interval_LedRec = 0;//in millisec
     int commandInit = 144;
 
     bool isNoteOffCommand();

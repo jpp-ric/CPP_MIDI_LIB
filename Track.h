@@ -3,7 +3,8 @@
 
 #include <IDisplayer.h>
 
-#define MAX_NB_MIDI_MESSAGES 3000
+#define MAX_NB_MIDI_MESSAGES 2500
+#define MAX_NB_MIDI_MESSAGES_TRK5 15000
 #define MAX_NB_TIMES MAX_NB_MIDI_MESSAGES
 
 class Track
@@ -17,7 +18,7 @@ public:
     void setNumber(int number);
     int getNumber();
     void setDisplayer(IDisplayer* displayer);
-    
+   
     
     //--- Déclaration des membres public --- (à éviter)
 
