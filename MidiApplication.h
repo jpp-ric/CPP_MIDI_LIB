@@ -21,7 +21,7 @@
 #define BANK3 38
 #define BANK4 39
 #define BUTTON_MAX 35
-// #define STATUS_INTERVAL NB_CHANNELS - 1
+// #define STATUS_int ERVAL NB_CHANNELS - 1
 
 
 class MidiApplication
@@ -40,7 +40,7 @@ public:
     void setDisplayer(IDisplayer* displayer);
     void Metronome();
     void Turnoffallchannels();
-    void sendMidiMessageMg(int command,int data2,int data3);
+    void sendMidiMessageMg(int  command,int  data2,int  data3);
 
     void play_1();
     void play_2();
@@ -50,7 +50,13 @@ public:
     void StartStopPlayTrk5();
     void playTrk5();
     void StartRecTrack5();
-    void startlooptrk5();
+    void startloopRectrk1();
+    void startloopRectrk2();
+    void startloopRectrk3();
+    void startloopRectrk4();
+    void StoreNoteondata2();
+
+    void startloopRectrk5();
     void StartStopPlayTrk6();
     void playTrk6();
     void StartRecTrk6();
@@ -88,6 +94,8 @@ public:
     void StoreDataTrk4();
     void StoreDataTrk5();
     void StoreDataTrk6();
+  
+
 
     //void Channel1Bank3();
      
@@ -103,11 +111,11 @@ public:
     bool play_loop_Trk6 = false;
     bool TimerLedOff = false; 
     bool TimerLed = false;  
-    bool SwitchInTrk5b=true;
+    bool SwitchinTrk5b=true;
     bool SwitchOutTrk1=false;
-    bool SwitchInTrk5=false;
+    bool SwitchinTrk5=false;
     bool SwitchOutTrk2=false;
-    bool SwitchInTrk5_2=false;
+    bool SwitchinTrk5_2=false;
 
     bool play_1_ok = false;
     bool play_2_ok = false;
@@ -169,7 +177,7 @@ public:
     unsigned short midiCodeIndex_2 = 0;
     unsigned short midiCodeIndex_3 = 0;
     unsigned short midiCodeIndex_4 = 0;
-    unsigned short int midiCodeIndex_Trk5 = 0;
+    unsigned short midiCodeIndex_Trk5 = 0;
     unsigned short midiCodeIndex_Trk6 = 0;
     float  Ticks = 0.; // ticks horloge
     float  TicksTrk5 = 0.; // ticks horloge track merge
@@ -178,61 +186,62 @@ public:
    
 
     float time1s[MAX_NB_TIMES];
-    int command1s[MAX_NB_MIDI_MESSAGES];
-    int data31s[MAX_NB_MIDI_MESSAGES];
-    int data21s[MAX_NB_MIDI_MESSAGES];
+    int  command1s[MAX_NB_MIDI_MESSAGES];
+    int  data31s[MAX_NB_MIDI_MESSAGES];
+    int  data21s[MAX_NB_MIDI_MESSAGES];
 
     float time2s[MAX_NB_TIMES];
-    int command2s[MAX_NB_MIDI_MESSAGES];
-    int data32s[MAX_NB_MIDI_MESSAGES];
-    int data22s[MAX_NB_MIDI_MESSAGES];
+    int  command2s[MAX_NB_MIDI_MESSAGES];
+    int  data32s[MAX_NB_MIDI_MESSAGES];
+    int  data22s[MAX_NB_MIDI_MESSAGES];
     
 
     float time3s[MAX_NB_TIMES];
-    int command3s[MAX_NB_MIDI_MESSAGES];
-    int data33s[MAX_NB_MIDI_MESSAGES];
-    int data23s[MAX_NB_MIDI_MESSAGES];
+    int  command3s[MAX_NB_MIDI_MESSAGES];
+    int  data33s[MAX_NB_MIDI_MESSAGES];
+    int  data23s[MAX_NB_MIDI_MESSAGES];
 
     float time4s[MAX_NB_TIMES];
-    int command4s[MAX_NB_MIDI_MESSAGES];
-    int data34s[MAX_NB_MIDI_MESSAGES];
-    int data24s[MAX_NB_MIDI_MESSAGES];
+    int  command4s[MAX_NB_MIDI_MESSAGES];
+    int  data34s[MAX_NB_MIDI_MESSAGES];
+    int  data24s[MAX_NB_MIDI_MESSAGES];
 
     float timeTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
-    int commandTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
-    int data3Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
-    int data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int  commandTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int  data3Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    int  data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
 
     float timeTrk6[MAX_NB_TIMES];
-    int commandTrk6[MAX_NB_MIDI_MESSAGES];
-    int data3Trk6[MAX_NB_MIDI_MESSAGES];
-    int data2Trk6[MAX_NB_MIDI_MESSAGES];
+    int  commandTrk6[MAX_NB_MIDI_MESSAGES];
+    int  data3Trk6[MAX_NB_MIDI_MESSAGES];
+    int  data2Trk6[MAX_NB_MIDI_MESSAGES];
 
     float timeTrkMg[MAX_NB_TIMES];
-    int commandTrkMg[MAX_NB_MIDI_MESSAGES];
-    int data3TrkMg[MAX_NB_MIDI_MESSAGES];
-    int data2TrkMg[MAX_NB_MIDI_MESSAGES];
+    int  commandTrkMg[MAX_NB_MIDI_MESSAGES];
+    int  data3TrkMg[MAX_NB_MIDI_MESSAGES];
+    int  data2TrkMg[MAX_NB_MIDI_MESSAGES];
 
-    int Store_Vel_Run_NT_TrkMg[NT_RUN_MAX];
-    int Store_Vel_Run_ST_TrkMg[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_TrkMg[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_TrkMg[NT_RUN_MAX];
+    int StatusNoteon[NT_RUN_MAX];
 
    
   
-    int Store_Vel_Run_NT_Track1[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track1[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track2[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track2[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track3[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track3[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track4[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track4[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Trk5[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Trk5[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Trk6[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Trk6[NT_RUN_MAX];
-    int X_velocitych1[NT_RUN_MAX];
-    int Control_Button[BUTTON_MAX];
-    int Control_Button_Onlyon[BUTTON_MAX];
+    int  Store_Vel_Run_NT_Track1[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Track1[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_Track2[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Track2[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_Track3[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Track3[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_Track4[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Track4[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Trk5[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_Trk5[NT_RUN_MAX];
+    int  Store_Vel_Run_ST_Trk6[NT_RUN_MAX];
+    int  Store_Vel_Run_NT_Trk6[NT_RUN_MAX];
+    int  X_velocitych1[NT_RUN_MAX];
+    int  Control_Button[BUTTON_MAX];
+    int  Control_Button_Onlyon[BUTTON_MAX];
     
 
     void StoreControlData2();
@@ -241,31 +250,31 @@ public:
 private:
     //--- Déclaration des Méthodes private ---
     IDisplayer *getDisplayer();
-    int getMidiStreamCurrentMidiCode();
-    bool isNoteOnOrOffCommandChannel1(int command);
+    int  getMidiStreamCurrentMidiCode();
+    bool isNoteOnOrOffCommandChannel1(int  command);
     void setCommandChannel();
    
     unsigned int SpeedLed13=1000000;
-    int getNoteOffCommandForChannel(int channel);
-    int getNoteOnCommandForChannel(int channel);
-    int getControlChangeCommandForChannel(int channel);
-    int getProgramChangeCommandForChannel(int channel);
+    int  getNoteOffCommandForChannel(int  channel);
+    int  getNoteOnCommandForChannel(int  channel);
+    int  getControlChangeCommandForChannel(int  channel);
+    int  getProgramChangeCommandForChannel(int  channel);
 
-    int getCommandChannel(int command);
-    unsigned int Interval_LedRec = 0;//in millisec
-    int commandInit = 144;
+    int  getCommandChannel(int  command);
+    unsigned int interval_LedRec = 0;//in millisec
+    int  commandInit = 144;
 
     bool isNoteOffCommand();
-    bool isNoteOffCommand(int command);
+    bool isNoteOffCommand(int  command);
     bool isNoteOnCommand();
-    bool isNoteOnCommand(int command);
+    bool isNoteOnCommand(int  command);
     bool isControlChangeCommand();
-    bool isControlChangeCommand(int command);
+    bool isControlChangeCommand(int  command);
     bool isProgramChangeCommand();
-    bool isProgramChangeCommand(int command);
+    bool isProgramChangeCommand(int  command);
 
     void sendCurrentMidiMessage();
-    void sendMidiMessage(int command, int data2, int data3 = UNDEFINED_MIDI_CODE);
+    void sendMidiMessage(int  command, int  data2, int  data3 = UNDEFINED_MIDI_CODE);
     void sendPitchBend();
     void sendProgramChange();
 
@@ -299,41 +308,41 @@ private:
     // MidiCodeHandler* midiCodeHandler = 0;
     IMidiStream* midiStream = 0;
     IDisplayer* displayer = 0;
-    int CurrentChannelNumberNote=144;
-    int octav = 0;
-    int command = 0;
-    int data2 = 60;
-    int data3 = 100;
-    int command_tampon = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
+    int  CurrentChannelNumberNote=144;
+    int  octav = 0;
+    int  command = 0;
+    int  data2 = 60;
+    int  data3 = 100;
+    int  command_tampon = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
 
-    int command_nt = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
-    int commandChannel = 1;
-    int commandChannelNote = 1;
+    int  command_nt = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
+    int  commandChannel = 1;
+    int  commandChannelNote = 1;
 
     bool start_rec = false;
     int inst = 1;
     int inst_1 = 1;
     int inst_2 = 1;
-    int data2ControlChg = 0;
-    int control28 = 0;
-    int CommandSplitOn = 144;
+    int  data2ControlChg = 0;
+    int  control28 = 0;
+    int  CommandSplitOn = 144;
 
     bool switch_split = false;
     bool flag_split = false;
     bool flag = false;
 
     int inst1 = 0;
-    int inst2 = 0;
-    int inst3 = 0;
-    int inst4 = 0;
-    int inst5 = 0;
-    int inst6 = 0;
-    int inst7 = 0;
-    int inst8 = 0;
-    int inst9 = 0;
-    int inst10 = 0;
-    int inst11 = 0;
-    int inst12 = 0;
+    int  inst2 = 0;
+    int  inst3 = 0;
+    int  inst4 = 0;
+    int  inst5 = 0;
+    int  inst6 = 0;
+    int  inst7 = 0;
+    int  inst8 = 0;
+    int  inst9 = 0;
+    int  inst10 = 0;
+    int  inst11 = 0;
+    int  inst12 = 0;
     
     bool switch_start_sinc = true;
     bool switch_on_off_trk1 = false;
@@ -342,6 +351,7 @@ private:
     bool switch_on_off_trk4 = false;
     bool switch_on_off_Trk5 = false;
     bool switch_on_off_Trk6 = false;
-    bool SplitOn = false;    
+    bool SplitOn = false;
+   bool  AuthorizeStartRecT5=true;    
     
 };
