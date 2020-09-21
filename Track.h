@@ -18,14 +18,21 @@ public:
     void setNumber(int number);
     int getNumber();
     void setDisplayer(IDisplayer* displayer);
+    void essai();
+    int fr=0;
    
     
     //--- Déclaration des membres public --- (à éviter)
 
-    // int command[MAX_NB_MIDI_MESSAGES];
+     //int essai[2];
     // int data2[MAX_NB_MIDI_MESSAGES];
     // int data3[MAX_NB_MIDI_MESSAGES];    
-    // int times[MAX_NB_TIMES];
+     //int times[MAX_NB_TIMES];
+    //int essai2=0;
+     
+
+
+     
  
 private:
 
@@ -35,6 +42,7 @@ private:
     //--- Déclaration des membres private ---
     IDisplayer* displayer = 0;
     int number = 1;
+    
 
 };
 

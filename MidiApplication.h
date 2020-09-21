@@ -56,12 +56,18 @@ public:
     void startloopRectrk4();
     void StoreNoteondata2();
 
+    void  StartRecTrack2();
+    void StartStopPlayTrk2();
+    void StartRecTrack3();
+    void StartStopPlayTrk3();
+    void StartRecTrack4();
+
     void startloopRectrk5();
     void StartStopPlayTrk6();
     void playTrk6();
     void StartRecTrk6();
     void recordTrk6();
-    void StartRecTrack4();
+   
     void record_1();
     void record_2();
     void record_3();
@@ -242,7 +248,7 @@ public:
     int  X_velocitych1[NT_RUN_MAX];
     int  Control_Button[BUTTON_MAX];
     int  Control_Button_Onlyon[BUTTON_MAX];
-    
+    int  comm = 144;
 
     void StoreControlData2();
 

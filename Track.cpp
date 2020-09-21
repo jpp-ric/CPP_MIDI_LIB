@@ -10,7 +10,10 @@ Track::Track(int number)
 Track::~Track()
 {
 }
+//================================================================
 
+
+//===============================================================
 void Track::setDisplayer(IDisplayer* displayer)
 {
     this->displayer = displayer;
@@ -28,4 +31,9 @@ int Track::getNumber()
 void Track::setNumber(int number)
 {
     this->number = number;
+}
+
+void Track::essai(){
+this->fr=34;
+
 }
