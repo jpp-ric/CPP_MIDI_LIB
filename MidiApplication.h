@@ -20,8 +20,17 @@
 #define BANK2 37
 #define BANK3 38
 #define BANK4 39
+#define INSTR1_INIT 1
+#define INSTR2_INIT 34
+#define INSTR3_INIT 25
+#define INSTR4_INIT 22
+#define INSTR5_INIT 27
+#define INSTR6_INIT 19
+#define INSTR7_INIT 41
+#define INSTR8_INIT 67
 #define BUTTON_MAX 35
-// #define STATUS_int ERVAL NB_CHANNELS - 1
+#define LOOP_TRACK 98
+
 
 
 class MidiApplication
@@ -31,9 +40,12 @@ public:
 
     MidiApplication(IMidiStream* midiStream);
     ~MidiApplication();
-
+    void sendProgramChange();   
     void init();
     void initArrays();
+    void initArrays2();
+    void initArrays3();
+    void initArrays4();
     IMidiStream *getMidiStream();
 
     void handleMidiCode();
@@ -108,6 +120,9 @@ public:
     
 
     //--- Déclaration des membres public --- (à éviter ! si pas nécessaire mettre en private)
+    //bool sd_cardtrk1=false
+    bool DataMidtoSd = false;
+    bool SdtoDataMid = false;
     bool Bang = false;
     bool play_loop = false;
     bool play_loop2 = false; 
@@ -190,26 +205,27 @@ public:
     float measure = 0.;
     float beat1 = 1. ;
    
-
+    short int commandx[12];
     float time1s[MAX_NB_TIMES];
-    int  command1s[MAX_NB_MIDI_MESSAGES];
-    int  data31s[MAX_NB_MIDI_MESSAGES];
-    int  data21s[MAX_NB_MIDI_MESSAGES];
+    unsigned int  command1s[MAX_NB_MIDI_MESSAGES];
+   // unsigned int  data31s[MAX_NB_MIDI_MESSAGES];
+    //unsigned int  data21s[MAX_NB_MIDI_MESSAGES];
 
     float time2s[MAX_NB_TIMES];
     int  command2s[MAX_NB_MIDI_MESSAGES];
-    int  data32s[MAX_NB_MIDI_MESSAGES];
+    //int  data32s[MAX_NB_MIDI_MESSAGES];
     int  data22s[MAX_NB_MIDI_MESSAGES];
+    int essai=0;
     
 
     float time3s[MAX_NB_TIMES];
     int  command3s[MAX_NB_MIDI_MESSAGES];
-    int  data33s[MAX_NB_MIDI_MESSAGES];
+    //int  data33s[MAX_NB_MIDI_MESSAGES];
     int  data23s[MAX_NB_MIDI_MESSAGES];
 
     float time4s[MAX_NB_TIMES];
     int  command4s[MAX_NB_MIDI_MESSAGES];
-    int  data34s[MAX_NB_MIDI_MESSAGES];
+   // int  data34s[MAX_NB_MIDI_MESSAGES];
     int  data24s[MAX_NB_MIDI_MESSAGES];
 
     float timeTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
@@ -217,22 +233,22 @@ public:
     int  data3Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
     int  data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
 
-    float timeTrk6[MAX_NB_TIMES];
-    int  commandTrk6[MAX_NB_MIDI_MESSAGES];
-    int  data3Trk6[MAX_NB_MIDI_MESSAGES];
-    int  data2Trk6[MAX_NB_MIDI_MESSAGES];
+    // float timeTrk6[MAX_NB_TIMES];
+    // int  commandTrk6[MAX_NB_MIDI_MESSAGES];
+    // int  data3Trk6[MAX_NB_MIDI_MESSAGES];
+    // int  data2Trk6[MAX_NB_MIDI_MESSAGES];
 
-    float timeTrkMg[MAX_NB_TIMES];
-    int  commandTrkMg[MAX_NB_MIDI_MESSAGES];
-    int  data3TrkMg[MAX_NB_MIDI_MESSAGES];
-    int  data2TrkMg[MAX_NB_MIDI_MESSAGES];
+    // float timeTrkMg[MAX_NB_TIMES];
+    // int  commandTrkMg[MAX_NB_MIDI_MESSAGES];
+    // int  data3TrkMg[MAX_NB_MIDI_MESSAGES];
+    // int  data2TrkMg[MAX_NB_MIDI_MESSAGES];
 
     int  Store_Vel_Run_NT_TrkMg[NT_RUN_MAX];
     int  Store_Vel_Run_ST_TrkMg[NT_RUN_MAX];
     int StatusNoteon[NT_RUN_MAX];
 
    
-  
+      
     int  Store_Vel_Run_NT_Track1[NT_RUN_MAX];
     int  Store_Vel_Run_ST_Track1[NT_RUN_MAX];
     int  Store_Vel_Run_NT_Track2[NT_RUN_MAX];
@@ -251,6 +267,24 @@ public:
     int  comm = 144;
 
     void StoreControlData2();
+
+     int inst1 = 0;
+    int  inst2 = 0;
+    int  inst3 = 0;
+    int  inst4 = 0;
+    int  inst5 = 0;
+    int  inst6 = 0;
+    int  inst7 = 0;
+    int  inst8 = 0;
+    int  inst9 = 0;
+    int  inst10 = 0;
+    int  inst11 = 0;
+    int  inst12 = 0;
+
+     int inst = 1;
+    int inst_1 = 1;
+    int inst_2 = 1;
+     int  command = 0;
 
 
 private:
@@ -282,7 +316,7 @@ private:
     void sendCurrentMidiMessage();
     void sendMidiMessage(int  command, int  data2, int  data3 = UNDEFINED_MIDI_CODE);
     void sendPitchBend();
-    void sendProgramChange();
+    
 
     void handleNoteOnOffCommand();
     void handleControlCommand();
@@ -316,7 +350,7 @@ private:
     IDisplayer* displayer = 0;
     int  CurrentChannelNumberNote=144;
     int  octav = 0;
-    int  command = 0;
+   
     int  data2 = 60;
     int  data3 = 100;
     int  command_tampon = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
@@ -326,9 +360,7 @@ private:
     int  commandChannelNote = 1;
 
     bool start_rec = false;
-    int inst = 1;
-    int inst_1 = 1;
-    int inst_2 = 1;
+   
     int  data2ControlChg = 0;
     int  control28 = 0;
     int  CommandSplitOn = 144;
@@ -337,18 +369,7 @@ private:
     bool flag_split = false;
     bool flag = false;
 
-    int inst1 = 0;
-    int  inst2 = 0;
-    int  inst3 = 0;
-    int  inst4 = 0;
-    int  inst5 = 0;
-    int  inst6 = 0;
-    int  inst7 = 0;
-    int  inst8 = 0;
-    int  inst9 = 0;
-    int  inst10 = 0;
-    int  inst11 = 0;
-    int  inst12 = 0;
+   
     
     bool switch_start_sinc = true;
     bool switch_on_off_trk1 = false;

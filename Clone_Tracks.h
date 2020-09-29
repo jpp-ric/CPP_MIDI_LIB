@@ -36,4 +36,10 @@ char* nomAccord = tabAccords[ tabNotesAccord[0] ]
                             [ tabNotesAccord[2] ]
                             [ tabNotesAccord[3] ]
                             [ tabNotesAccord[4] ];
-*/                            
+
+
+*/ 
+
+
+
+   
