@@ -102,13 +102,13 @@ void MidiApplication::initArrays3()
     this->time2s[iNumData ]=0.;
     this->command2s[iNumData ]=0;
     //this->data32s[iNumData ]=0;
-    this->data22s[iNumData ]=0;
+    //this->data22s[iNumData ]=0;
     
 
     this->time3s[iNumData ]=.0;
     this->command3s[iNumData ]=0;
     //this->data33s[iNumData ]=0;
-    this->data23s[iNumData ]=0;
+    //this->data23s[iNumData ]=0;
 
     this->time4s[iNumData ]=0.;
     this->command4s[iNumData ]=0;
@@ -125,8 +125,8 @@ void MidiApplication::initArrays4()
   {
     this->timeTrk5[iNumData ] = 0.;
     this->commandTrk5[iNumData ] = 0;
-    this->data2Trk5[iNumData ] = 0;
-    this->data3Trk5[iNumData ] = 0;
+    //this->data2Trk5[iNumData ] = 0;
+    //this->data3Trk5[iNumData ] = 0;
         
      
   }
@@ -501,13 +501,19 @@ void MidiApplication::sendMidiMessageMg(int commandm, int data2m, int data3m)
     if (this->SwitchinTrk5b)
     {
       //this->getDisplayer()->display(this->midiCodeIndex_Trk5);
+      if(this->midiCodeIndex_Trk5 == 1)
+      {
+      this->tempotrk5=this->x_count;  
       this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
-      this->commandTrk5[this->midiCodeIndex_Trk5] = commandm;
+      this->commandTrk5[this->midiCodeIndex_Trk5] = commandm<<16 |data2m<<8 |data3m ;
       this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
-      this->data2Trk5[this->midiCodeIndex_Trk5] = data2m;
-      this->data2Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
-      this->data3Trk5[this->midiCodeIndex_Trk5] = data3m;
-      this->data3Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
+      }
+      else 
+      {
+      this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
+      this->commandTrk5[this->midiCodeIndex_Trk5] = commandm<<16 |data2m<<8 |data3m ;
+      this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
+      }
       this->midiCodeIndex_Trk5 += 1;
       this->startloopRectrk5();
     }
@@ -1079,7 +1085,7 @@ void MidiApplication::record_1()
 
   this->startloopRectrk1();
 
-  if (start_rec_1)
+  if (this->start_rec_1)
   {
 
     this->StoreDataTrk1();
@@ -1276,12 +1282,13 @@ void MidiApplication::record_4()
 //**************************play1****************************************
 void MidiApplication::play_1()
 {
-  //this->getDisplayer()->display("playstop");
+  
 
   //int i=  Track->telleMethodeDeLaClasseTrack():
   //this->getDisplayer()->display(2342);
   if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES && this->data_trk_1)
   {
+    //this->x_count = this->tempotrk1;
     //this->getDisplayer()->display(this->midiCodeIndex_1);
     if (this->Ticks >= this->time1s[this->midiCodeIndex_1])
     {
@@ -1378,12 +1385,9 @@ void MidiApplication::play_1()
         return;
       }
       //=======================================================================
-      //go to merge track5
+      
 
-      // this->sendMidiMessage(this->command1s[this->midiCodeIndex_1],
-      //                       this->data21s[this->midiCodeIndex_1] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-      //                       this->data21s[this->midiCodeIndex_1] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
-      //this->getDisplayer()->display(this->command1s[1]>>17 & 0x000000FF);//command;
+      
       this->sendMidiMessage(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF,//command
                              this->command1s[this->midiCodeIndex_1] >>8 & 0x000000FF,//data2
                              this->command1s[this->midiCodeIndex_1] & 0x000000FF);//data3
@@ -1395,9 +1399,7 @@ void MidiApplication::play_1()
         this->play_1_ok = false;
       }
 
-      // this->sendMidiMessageMg(this->command1s[this->midiCodeIndex_1],
-      //                       this->data21s[this->midiCodeIndex_1] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-      //                       this->data21s[this->midiCodeIndex_1] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
+      
       this->sendMidiMessageMg(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF,//command
                              this->command1s[this->midiCodeIndex_1] >>8 & 0x000000FF,//data2
                              this->command1s[this->midiCodeIndex_1] & 0x000000FF);//data3
@@ -1419,7 +1421,7 @@ void MidiApplication::play_2()
     if (this->Ticks >= this->time2s[this->midiCodeIndex_2])
     {
 
-      if (this->data22s[this->midiCodeIndex_2] == 98) //rebouclage
+      if (this->command2s[this->midiCodeIndex_2] == 98) //rebouclage
 
       {
         //this->getDisplayer()->display("play1rebl");
@@ -1436,16 +1438,26 @@ void MidiApplication::play_2()
       if (this->Flag_Send_trk2 && this->data_trk_2)
       {
 
-        this->sendMidiMessage(this->command2s[this->midiCodeIndex_2],
-                            this->data22s[this->midiCodeIndex_2] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data22s[this->midiCodeIndex_2] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
+        
+      this->sendMidiMessage(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF,//command
+                             this->command2s[this->midiCodeIndex_2] >>8 & 0x000000FF,//data2
+                             this->command2s[this->midiCodeIndex_2] & 0x000000FF);//data3
 
-        this->sendMidiMessageMg(this->command2s[this->midiCodeIndex_2],
-                            this->data22s[this->midiCodeIndex_2] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data22s[this->midiCodeIndex_2] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
-        //this->StoreDataTrk5_2Mg();
+      this->StoreRuningNoteTrk2();
+      if (this->command2s[this->midiCodeIndex_2 + 1] == 0)
+      {
+        
+        this->play_2_ok = false;
       }
-      this->StoreRuningNoteTrk2(); //store runing note/delete note "off"
+
+      
+      this->sendMidiMessageMg(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF,//command
+                             this->command2s[this->midiCodeIndex_2] >>8 & 0x000000FF,//data2
+                             this->command2s[this->midiCodeIndex_2] & 0x000000FF);//data3
+
+      
+      }
+      
       if (this->command2s[this->midiCodeIndex_2] == 0 && !this->play_loop)
       {
         //this->getDisplayer()->display("play1zero");
@@ -1469,7 +1481,7 @@ void MidiApplication::play_3()
   {
     if (this->Ticks >= this->time3s[this->midiCodeIndex_3])
     {
-      if (this->data23s[this->midiCodeIndex_3] == 98) //rebouclage
+      if (this->command3s[this->midiCodeIndex_3] == 98) //rebouclage
 
       {
 
@@ -1485,19 +1497,25 @@ void MidiApplication::play_3()
       //this->getDisplayer()->display("play_2");
       if (this->Flag_Send_trk3 && this->data_trk_3)
       {
-        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3],
-                            this->data23s[this->midiCodeIndex_3] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data23s[this->midiCodeIndex_3] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
+        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF,//command
+                             this->command3s[this->midiCodeIndex_3] >>8 & 0x000000FF,//data2
+                             this->command3s[this->midiCodeIndex_3] & 0x000000FF);//data3
 
-        if (this->start_rec_Trk5)
-        {
-         this->sendMidiMessageMg(this->command3s[this->midiCodeIndex_3],
-                            this->data23s[this->midiCodeIndex_3] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data23s[this->midiCodeIndex_3] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
-
-        }
+      this->StoreRuningNoteTrk3();
+      if (this->command3s[this->midiCodeIndex_3 + 1] == 0)
+      {
+        
+        this->play_3_ok = false;
       }
-      this->StoreRuningNoteTrk3(); //store runing note/delete note "off"
+
+      
+      this->sendMidiMessageMg(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF,//command
+                             this->command3s[this->midiCodeIndex_3] >>8 & 0x000000FF,//data2
+                             this->command3s[this->midiCodeIndex_3] & 0x000000FF);//data3
+
+      
+      }
+     
 
       if (this->command3s[this->midiCodeIndex_3] == 0 && !this->play_loop)
       {
@@ -1613,8 +1631,8 @@ void MidiApplication::TurnoffNtonLoopTrack1()
       this->midiStream->write(this->Store_Vel_Run_ST_Track1[indexDel]);
       this->midiStream->write(this->Store_Vel_Run_NT_Track1[indexDel]);
       this->midiStream->write(1);
-      this->getDisplayer()->display(this->Store_Vel_Run_ST_Track1[indexDel]);
-      this->getDisplayer()->display(this->Store_Vel_Run_NT_Track1[indexDel]);
+      //this->getDisplayer()->display(this->Store_Vel_Run_ST_Track1[indexDel]);
+      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track1[indexDel]);
     }
   }
 }
@@ -1670,18 +1688,20 @@ void MidiApplication::TurnoffNtonLoopTrack4()
 //========store on note"on"/delete on note "off"=============
 void MidiApplication::StoreRuningNoteTrk2()
 {
-  if (!this->isNoteOffCommand(this->command2s[this->midiCodeIndex_2]))
-  {
+  if (!this->isNoteOffCommand(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF))//if status "note on"
+  {                                                                    //=data2
+    this->Store_Vel_Run_NT_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] =
+        this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF;//store note "on" in index note "on"
 
-    this->Store_Vel_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]] =
-        this->data22s[this->midiCodeIndex_2];
-
-    this->Store_Vel_Run_ST_Track2[this->data22s[this->midiCodeIndex_2]] = this->command2s[this->midiCodeIndex_2] - 16; //-16 = turn in "note off"
-  }
+    this->Store_Vel_Run_ST_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
+   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
+    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
+  }         //store status in index note "on"
+  
   else
   {
-    this->Store_Vel_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]] = 0;
-    this->Store_Vel_Run_ST_Track2[this->data22s[this->midiCodeIndex_2]] = 0;
+    this->Store_Vel_Run_NT_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = 0;//index note "on" = 0
+    this->Store_Vel_Run_ST_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = 0;//index stat =0
   }
 }
 //this->getDisplayer()->display(Store_Vel_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]]);
@@ -1728,20 +1748,23 @@ void MidiApplication::StoreRuningNoteTrk1()
 //========store on note"on"/delete on note "off"=============
 void MidiApplication::StoreRuningNoteTrk3()
 {
-  if (!this->isNoteOffCommand(this->command3s[this->midiCodeIndex_3]))
-  {
-    this->Store_Vel_Run_NT_Track3[this->data23s[this->midiCodeIndex_3]] =
-        this->data23s[this->midiCodeIndex_3];
+  if (!this->isNoteOffCommand(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF))//if status "note on"
+  {                                                                    //=data2
+    this->Store_Vel_Run_NT_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] =
+        this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF;//store note "on" in index note "on"
 
-    this->Store_Vel_Run_ST_Track3[this->data23s[this->midiCodeIndex_3]] =
-        this->command3s[this->midiCodeIndex_3] - 16; //-16 = turn in "note off"
-  }
+    this->Store_Vel_Run_ST_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
+   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
+    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
+  }         //store status in index note "on"
+  
   else
   {
-    this->Store_Vel_Run_NT_Track3[this->data23s[this->midiCodeIndex_3]] = 0;
-    this->Store_Vel_Run_ST_Track3[this->data23s[this->midiCodeIndex_3]] = 0;
+    this->Store_Vel_Run_NT_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = 0;//index note "on" = 0
+    this->Store_Vel_Run_ST_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = 0;//index stat =0
   }
 }
+//=============================================================================
 
 void MidiApplication::Inst_ChgCh1()
 {
@@ -2080,7 +2103,7 @@ void MidiApplication::StartRecTrack2()
 
       this->command2s[i] = 0;
       this->time2s[i] = 0;
-      this->data22s[i] = 0;
+     // this->data22s[i] = 0;
       //this->data32s[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
@@ -2125,7 +2148,7 @@ void MidiApplication::StartRecTrack3()
     {
       this->command3s[i] = 0;
       this->time3s[i] = 0;
-      this->data23s[i] = 0;
+      //this->data23s[i] = 0;
       //this->data33s[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
@@ -2393,10 +2416,11 @@ void MidiApplication::playTrk5()
 {
 
   if (this->data_Trk5)
-  {
+    {
+     //this->x_count = this->tempotrk5; 
     if (this->TicksTrk5 >= this->timeTrk5[this->midiCodeIndex_Trk5])
     {
-      if ((this->data2Trk5[this->midiCodeIndex_Trk5] == 99) ||
+      if ((this->commandTrk5[this->midiCodeIndex_Trk5] == 99) ||
           (this->midiCodeIndex_Trk5 + 12 > MAX_NB_MIDI_MESSAGES_TRK5)) //rebouclage
 
       {
@@ -2412,9 +2436,9 @@ void MidiApplication::playTrk5()
 
       if (this->Flag_Send_Trk5 && this->data_Trk5)
       {
-        this->sendMidiMessage(this->commandTrk5[this->midiCodeIndex_Trk5],
-                              this->data2Trk5[this->midiCodeIndex_Trk5],
-                              this->data3Trk5[this->midiCodeIndex_Trk5]);
+        this->sendMidiMessage(this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF,//command
+                             this->commandTrk5[this->midiCodeIndex_Trk5] >>8 & 0x000000FF,//data2
+                             this->commandTrk5[this->midiCodeIndex_Trk5] & 0x000000FF);//data3
         this->StoreRuningNoteTrk5(); //store runing note/delete note "off"
 
         this->midiCodeIndex_Trk5 += 1;
@@ -2500,8 +2524,8 @@ void MidiApplication::StartRecTrack5()
     {
       this->commandTrk5[i] = 0;
       this->timeTrk5[i] = 0;
-      this->data2Trk5[i] = 0;
-      this->data3Trk5[i] = 0;
+     // this->data2Trk5[i] = 0;
+      //this->data3Trk5[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
     for (int i = 0; i < 100; i++)
@@ -2521,17 +2545,20 @@ void MidiApplication::StartRecTrack5()
 
 void MidiApplication::StoreRuningNoteTrk5()
 {
-  if (!this->isNoteOffCommand(this->commandTrk5[this->midiCodeIndex_Trk5]))
-  {
-    this->Store_Vel_Run_NT_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] =
-        this->data2Trk5[this->midiCodeIndex_Trk5];
+  if (!this->isNoteOffCommand(this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF))//if status "note on"
+  {                                                                    //=data2
+    this->Store_Vel_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] =
+        this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF;//store note "on" in index note "on"
 
-    this->Store_Vel_Run_ST_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = this->commandTrk5[this->midiCodeIndex_Trk5] - 16; //-16 = turn in "note off"
-  }
+    this->Store_Vel_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
+   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
+    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
+  }         //store status in index note "on"
+  
   else
   {
-    this->Store_Vel_Run_NT_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = 0;
-    this->Store_Vel_Run_ST_Trk5[this->data2Trk5[this->midiCodeIndex_Trk5]] = 0;
+    this->Store_Vel_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = 0;//index note "on" = 0
+    this->Store_Vel_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = 0;//index stat =0
   }
 }
 //=================== turn off the runing  note and loop ===============================================
@@ -2681,51 +2708,67 @@ void MidiApplication::StoreDataTrk1()
 {
   //this->getDisplayer()->display(this->inst1);
   //***********************store data mid****************************************
+  
   this->time1s[this->midiCodeIndex_1] = this->Ticks;//delta time "ticks"
  if(this->midiCodeIndex_1== 1)
  {
+  
+ this->tempotrk1=this->x_count;   
  this->command1s[1] = this->inst1<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
  this->command1s[this->midiCodeIndex_1 + 1] = 0;
  }
- else {
+ else
+  {
   this->command1s[this->midiCodeIndex_1] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
   this->command1s[this->midiCodeIndex_1 + 1] = 0;                   //put 0 in index array + 1
  }
-  //this->data21s[this->midiCodeIndex_1] = this->data2 + this->octav; //note number
-  //this->data21s[this->midiCodeIndex_1] = this->data2<<8 | this->data3;//this->octav;
-  //this->data31s[this->midiCodeIndex_1] = this->data3;               //velocity
+  
   this->midiCodeIndex_1 += 1;                                       //incr index
-                                                                    //this->getDisplayer()->display(this->Ticks);
+                                                                    
 }
 
 //======================================================
 void MidiApplication::StoreDataTrk2()
 {
 
-  //this->getDisplayer()->display("rec2");
-  this->time2s[this->midiCodeIndex_2] = this->Ticks;
-  this->command2s[this->midiCodeIndex_2] = this->command;
-  this->command2s[this->midiCodeIndex_2 + 1] = 0; //put 0 in index array + 1
-  this->data22s[this->midiCodeIndex_2] = this->data2<<8 | this->data3;//this->octav; //this->data22s[this->midiCodeIndex_2] = this->data2;
-  this->data22s[this->midiCodeIndex_2 + 1] = 0;
-  //this->data32s[this->midiCodeIndex_2] = this->data3;
-  //this->data32s[this->midiCodeIndex_2 + 1] = 0;
-  this->midiCodeIndex_2 += 1;
+  this->time2s[this->midiCodeIndex_2] = this->Ticks;//delta time "ticks"
+ if(this->midiCodeIndex_2== 1)
+ {
+  
+ this->tempotrk2=this->x_count;   
+ this->command2s[1] = this->inst2<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
+ this->command2s[this->midiCodeIndex_2 + 1] = 0;
+ }
+ else
+  {
+  this->command2s[this->midiCodeIndex_2] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
+  this->command2s[this->midiCodeIndex_2 + 1] = 0;                   //put 0 in index array + 1
+ }
+  
+  this->midiCodeIndex_2 += 1;           
 }
 
 //====================================================
 void MidiApplication::StoreDataTrk3()
 {
-  //this->getDisplayer()->display("rec33");
-  this->time3s[this->midiCodeIndex_3] = this->Ticks;
-  this->command3s[this->midiCodeIndex_3] = this->command;
-  this->command3s[this->midiCodeIndex_3 + 1] = 0; //put 0 in index array + 1
-  this->data23s[this->midiCodeIndex_3] = this->data2<<8 | this->data3;//this->octav; //this->data22s[this->midiCodeIndex_2] = this->data2;
-  this->data23s[this->midiCodeIndex_3 + 1] = 0;
-  //this->data33s[this->midiCodeIndex_3] = this->data3;
-  //this->data33s[this->midiCodeIndex_3 + 1] = 0;
-  this->midiCodeIndex_3 += 1;
+  this->time3s[this->midiCodeIndex_3] = this->Ticks;//delta time "ticks"
+ if(this->midiCodeIndex_3== 1)
+ {
+  
+ this->tempotrk3=this->x_count;   
+ this->command3s[1] = this->inst2<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
+ this->command3s[this->midiCodeIndex_3 + 1] = 0;
+ }
+ else
+  {
+  this->command3s[this->midiCodeIndex_3] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
+  this->command3s[this->midiCodeIndex_3 + 1] = 0;                   //put 0 in index array + 1
+ }
+  
+  this->midiCodeIndex_3 += 1;           
 }
+  
+
 
 //======================== store data Trk4 =============
 void MidiApplication::StoreDataTrk4()
@@ -2746,13 +2789,21 @@ void MidiApplication::StoreDataTrk5()
 {
 
   //this->getDisplayer()->display("rec3");
-  this->timeTrk5[this->midiCodeIndex_Trk5] = TicksTrk5;
-  this->commandTrk5[this->midiCodeIndex_Trk5] = this->command;
+  if(this->midiCodeIndex_Trk5 == 1)
+  {
+   this->tempotrk5=this->x_count;
+   this->timeTrk5[this->midiCodeIndex_Trk5] = TicksTrk5; 
+  this->commandTrk5[this->midiCodeIndex_Trk5] = this->command<<16 | this->data2<<8 | this->data3;
   this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
-  this->data2Trk5[this->midiCodeIndex_Trk5] = this->data2;
-  this->data2Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
-  this->data3Trk5[this->midiCodeIndex_Trk5] = this->data3;
-  this->data3Trk5[this->midiCodeIndex_Trk5 + 1] = 0;
+
+  }
+  else {
+  
+  this->timeTrk5[this->midiCodeIndex_Trk5] = TicksTrk5; 
+  this->commandTrk5[this->midiCodeIndex_Trk5] = this->command<<16 | this->data2<<8 | this->data3;
+  this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
+  
+  }
   this->midiCodeIndex_Trk5 += 1;
 }
 //=============================================================
@@ -2830,7 +2881,7 @@ void MidiApplication::startloopRectrk5()
     this->Flag_Send_Trk5 = true;
 
     this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
-    this->data2Trk5[this->midiCodeIndex_Trk5] = 99;
+    this->commandTrk5[this->midiCodeIndex_Trk5] = 99;
     this->start_rec_Trk5 = false; //locking this
     this->play_Trk5 = true;       //switch play track 1
     this->midiCodeIndex_Trk5 = 0; //index array reset
@@ -2874,7 +2925,7 @@ void MidiApplication::startloopRectrk2()
       this->data_trk_2 = true;
       //this->getDisplayer()->display(this->Ticks);
       this->time2s[this->midiCodeIndex_2] = this->Ticks;
-      this->data22s[this->midiCodeIndex_2] = 98;
+      this->command2s[this->midiCodeIndex_2] = LOOP_TRACK;// & 0x000000FF;
 
       this->start_rec_2 = false; //locking this
       this->play_2_ok = true;    //switch play track 1
@@ -2902,7 +2953,7 @@ void MidiApplication::startloopRectrk3()
       this->Flag_Send_trk3 = true;
       //this->getDisplayer()->display("rec2");
       this->time3s[this->midiCodeIndex_3] = this->Ticks;
-      this->data23s[this->midiCodeIndex_3] = 98;
+      this->command3s[this->midiCodeIndex_3] = LOOP_TRACK;// & 0x000000FF;
       this->start_rec_3 = false; //locking this
       this->play_3_ok = true;    //switch play track 1
       this->midiCodeIndex_3 = 0; //index array reset
@@ -2936,3 +2987,42 @@ void MidiApplication::startloopRectrk4()
     }
   }
 }
+//=========================align notes ascending order============================================================================
+
+
+void MidiApplication::AlignNotes(int i, int j, int tab[], int tmp[]) {
+    if(j <= i){ return;}
+  
+    int m = (i + j) / 2;
+    
+    AlignNotes(i, m, tab, tmp);     //trier la moitié gauche récursivement
+    AlignNotes(m + 1, j, tab, tmp); //trier la moitié droite récursivement
+
+    int pg = i;     //pg pointe au début du sous-tableau de gauche
+    int pd = m + 1; //pd pointe au début du sous-tableau de droite
+    int c;          //compteur
+
+// on boucle de i à j pour remplir chaque élément du tableau final fusionné
+    for(c = i; c <= j; c++) {
+        if(pg == m + 1) { //le pointeur du sous-tableau de gauche a atteint la limite
+            tmp[c] = tab[pd];
+            pd++;
+        }else if (pd == j + 1) { //le pointeur du sous-tableau de droite a atteint la limite
+            tmp[c] = tab[pg];
+            pg++;
+        }else if (tab[pg] < tab[pd]) { //le pointeur du sous-tableau de gauche pointe vers un élément plus petit
+            tmp[c] = tab[pg];
+            pg++;
+        }else {  //le pointeur du sous-tableau de droite pointe vers un élément plus petit
+            tmp[c] = tab[pd];
+            pd++;
+        }
+    }
+
+    for(c = i; c <= j; c++) {  //copier les éléments de tmp[] à tab[]
+        tab[c] = tmp[c];
+    }
+}
+//==============================================================================
+
+
