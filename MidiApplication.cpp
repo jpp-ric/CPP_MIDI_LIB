@@ -11,7 +11,7 @@
 #include <MidiMessageNoteOff.h>
 #include <MidiMessageControlChange.h>
 #include <MidiMessageProgramChange.h>
-
+#include <stdio.h>
 
 MidiApplication::MidiApplication(IMidiStream *midiStream)
 {
@@ -56,66 +56,299 @@ IDisplayer *MidiApplication::getDisplayer()
 //***********************************************************************
 void MidiApplication::initArrays()
 {
+  for (int i = 0; i < 7; i++)
+  {
+    this->TabNtChord[i] = 0;
+  }
+
+  for (int i = 0; i < 55; i++)
+  {
+    this->NoteChord[i] = 0;
+  }
+
   for (char iNumData = 0; iNumData < BUTTON_MAX; iNumData++)
   {
     this->Control_Button[iNumData] = 0;
     this->Control_Button_Onlyon[iNumData] = 0;
-     
   }
 }
 //==================================================================
 
 void MidiApplication::initArrays2()
 {
-  for (char iNumData = 0; iNumData < NT_RUN_MAX ; iNumData++)
+  for (char iNumData = 0; iNumData < NT_RUN_MAX; iNumData++)
   {
-    
-   this->StatusNoteon[iNumData ]=0;   
-  
-   this->Store_Vel_Run_NT_Track1[iNumData ]=0;
-    this->Store_Vel_Run_ST_Track1[iNumData ]=0;
-    this->Store_Vel_Run_NT_Track2[iNumData ]=0;
-    this->Store_Vel_Run_ST_Track2[iNumData ]=0;
-    this->Store_Vel_Run_NT_Track3[iNumData ]=0;
-    this->Store_Vel_Run_ST_Track3[iNumData ]=0;
-    this->Store_Vel_Run_NT_Track4[iNumData ]=0;
-    this->Store_Vel_Run_ST_Track4[iNumData ]=0;
-    this->Store_Vel_Run_ST_Trk5[iNumData ]=0;
-    this->Store_Vel_Run_NT_Trk5[iNumData ]=0;
-    this->Store_Vel_Run_ST_Trk6[iNumData ]=0;
-    this->Store_Vel_Run_NT_Trk6[iNumData ]=0;
-    this->X_velocitych1[iNumData ]=0;
-    
-     
+
+    this->StatusNoteon[iNumData] = 0;
+    this->Store_Run_NT_OffTrack1[iNumData] = 0;
+    this->Store_Run_NT_Track1[iNumData] = 0;
+    this->Store_Run_ST_Track1[iNumData] = 0;
+    this->Store_Run_NT_Track2[iNumData] = 0;
+    this->Store_Run_ST_Track2[iNumData] = 0;
+    this->Store_Run_NT_Track3[iNumData] = 0;
+    this->Store_Run_ST_Track3[iNumData] = 0;
+    this->Store_Run_NT_Track4[iNumData] = 0;
+    this->Store_Run_ST_Track4[iNumData] = 0;
+    this->Store_Run_ST_Trk5[iNumData] = 0;
+    this->Store_Run_NT_Trk5[iNumData] = 0;
+    this->Store_Run_ST_Trk6[iNumData] = 0;
+    this->Store_Run_NT_Trk6[iNumData] = 0;
+
+    this->Store_Run_Vel_Track1[iNumData] = 0;
+    this->Store_Run_Vel_Track2[iNumData] = 0;
+    this->Store_Run_Vel_Track3[iNumData] = 0;
+    this->Store_Run_Vel_Track4[iNumData] = 0;
   }
+  //tab notes chord init============================
+  for (unsigned char i = 0; i < 100; i++)
+  {
+    this->TabConvertData2[13][i] = i; //Maj
+    this->TabConvertData2[23][i] = i; //min
+    this->TabConvertData2[14][i] = i; //Maj
+    this->TabConvertData2[24][i] = i; //min
+    this->TabConvertData2[34][i] = i; //7th
+    this->TabConvertData2[44][i] = i; //7thMaj
+    this->TabConvertData2[54][i] = i; //6th(min7)
+    this->TabConvertData2[64][i] = i; //min7
+    this->TabConvertData2[74][i] = i; //9th
+    this->TabConvertData2[84][i] = i; //dim
+    this->TabConvertData2[94][i] = i; //7dim
+    this->TabConvertData2[12][i] = i; //min6
+    this->TabConvertData2[11][i] = i; //sus4
+  }
+  //==================Maj array 13==================
+  this->TabConvertData2[13][57] = 52;
+
+  this->TabConvertData2[13][47] = 43;
+
+  this->TabConvertData2[13][59] = 60;
+
+  //this->TabConvertData2[13][57] = 55;
+
+  this->TabConvertData2[13][83] = 79;
+
+  this->TabConvertData2[13][71] = 76;
+  //================== sus4 ==================
+  this->TabConvertData2[11][52] = 53;
+
+  this->TabConvertData2[11][47] = 41;
+
+  this->TabConvertData2[11][64] = 65;
+
+  this->TabConvertData2[11][59] = 53;
+
+  // this->TabConvertData2[11][83] = 79;
+
+  // this->TabConvertData2[11][71] = 76;
+
+  //  this->TabConvertData2[11][57] = 52;
+
+  // this->TabConvertData2[11][47] = 43;
+
+  // this->TabConvertData2[11][59] = 60;
+
+  // //this->TabConvertData2[13][57] = 55;
+
+  // this->TabConvertData2[13][83] = 79;
+
+  // this->TabConvertData2[13][71] = 76;
+
+  //================== min 7th ==================
+  this->TabConvertData2[64][40] = 39;
+
+  this->TabConvertData2[64][45] = 43;
+
+  this->TabConvertData2[64][47] = 46;
+
+  this->TabConvertData2[64][52] = 51;
+
+  this->TabConvertData2[64][57] = 55;
+
+  this->TabConvertData2[64][59] = 58;
+
+  this->TabConvertData2[64][64] = 63;
+
+  this->TabConvertData2[64][69] = 67;
+
+  this->TabConvertData2[64][71] = 70;
+
+  this->TabConvertData2[64][76] = 75;
+
+  this->TabConvertData2[64][81] = 80;
+
+  this->TabConvertData2[64][83] = 82;
+  //================== min6 ==================
+  this->TabConvertData2[12][40] = 39;
+
+  this->TabConvertData2[12][45] = 43;
+
+  this->TabConvertData2[12][47] = 45;
+
+  this->TabConvertData2[12][52] = 51;
+
+  this->TabConvertData2[12][57] = 55;
+
+  this->TabConvertData2[12][59] = 57;
+
+  this->TabConvertData2[12][64] = 63;
+
+  this->TabConvertData2[12][69] = 67;
+
+  this->TabConvertData2[12][71] = 69;
+
+  this->TabConvertData2[12][76] = 75;
+
+  this->TabConvertData2[12][81] = 80;
+
+  this->TabConvertData2[12][83] = 81;
+  //==================6th (min 7th)==================
+  this->TabConvertData2[54][47] = 45;
+
+  this->TabConvertData2[54][59] = 57;
+
+  this->TabConvertData2[54][71] = 69;
+
+  this->TabConvertData2[54][83] = 81;
+  //==================Maj 7th ==================
+  this->TabConvertData2[44][45] = 43;
+
+  this->TabConvertData2[44][57] = 56;
+
+  this->TabConvertData2[44][69] = 67;
+
+  this->TabConvertData2[44][81] = 79;
+
+  this->TabConvertData2[44][50] = 52;
+
+  this->TabConvertData2[44][62] = 64;
+  //==================9th ==================
+  this->TabConvertData2[74][47] = 50;
+
+  this->TabConvertData2[74][59] = 62;
+
+  this->TabConvertData2[74][71] = 74;
+
+  this->TabConvertData2[74][83] = 86;
+
+  // this->TabConvertData2[13][69] = 67;
+
+  // this->TabConvertData2[13][71] = 72;
+  //==================dim ==================
+  this->TabConvertData2[84][47] = 45;
+
+  this->TabConvertData2[84][43] = 42;
+
+  this->TabConvertData2[84][40] = 39;
+
+  this->TabConvertData2[84][59] = 57;
+
+  this->TabConvertData2[84][55] = 54;
+
+  this->TabConvertData2[84][52] = 51;
+
+  this->TabConvertData2[84][71] = 69;
+
+  this->TabConvertData2[84][67] = 66;
+
+  this->TabConvertData2[84][64] = 63;
+
+  this->TabConvertData2[84][83] = 81;
+
+  this->TabConvertData2[84][79] = 78;
+
+  this->TabConvertData2[84][76] = 75;
+  //==================7dim ==================
+  this->TabConvertData2[94][47] = 46;
+
+  this->TabConvertData2[94][43] = 42;
+
+  this->TabConvertData2[94][40] = 39;
+
+  this->TabConvertData2[94][59] = 58;
+
+  this->TabConvertData2[94][55] = 54;
+
+  this->TabConvertData2[94][52] = 51;
+
+  this->TabConvertData2[94][71] = 70;
+
+  this->TabConvertData2[94][67] = 66;
+
+  this->TabConvertData2[94][64] = 63;
+
+  this->TabConvertData2[94][83] = 82;
+
+  this->TabConvertData2[94][79] = 78;
+
+  this->TabConvertData2[94][76] = 75;
+  //============= minor array=======================
+  this->TabConvertData2[23][40] = 39;
+
+  this->TabConvertData2[23][45] = 43;
+
+  this->TabConvertData2[23][47] = 48;
+
+  this->TabConvertData2[23][52] = 51;
+
+  this->TabConvertData2[23][57] = 55;
+
+  this->TabConvertData2[23][59] = 60;
+
+  this->TabConvertData2[23][64] = 63;
+
+  this->TabConvertData2[23][69] = 67;
+
+  this->TabConvertData2[23][71] = 72;
+
+  this->TabConvertData2[23][76] = 75;
+
+  this->TabConvertData2[23][81] = 80;
+
+  this->TabConvertData2[23][83] = 82;
+
+  //==================================================================
+  //============= 7th =======================
+  //this->TabConvertData2[34][45] = 46;
+
+  //this->TabConvertData2[34][45] = 46;
+
+  this->TabConvertData2[34][47] = 46;
+
+  //this->TabConvertData2[34][57] = 58;
+
+  this->TabConvertData2[34][71] = 70;
+
+  this->TabConvertData2[34][83] = 82;
+
+  //this->TabConvertData2[34][57] = 58;
+
+  this->TabConvertData2[34][59] = 58;
+
+  this->TabConvertData2[34][71] = 70;
+
+  //this->TabConvertData2[34][69] = 70;
+
+  //this->TabConvertData2[34][81] = 82;
+
+  this->TabConvertData2[34][83] = 82;
 }
+//================================================================
 //==================================================================
 void MidiApplication::initArrays3()
 {
-  for (int iNumData = 0; iNumData < MAX_NB_MIDI_MESSAGES ; iNumData++)
+  for (int iNumData = 0; iNumData < MAX_NB_MIDI_MESSAGES; iNumData++)
   {
-      this->time1s[iNumData ]=0.;
-    this->command1s[iNumData ]=0;
-    //this->data31s[iNumData ]=0;
-    //this->data21s[iNumData ]=0;
+    this->time1s[iNumData] = 0.;
+    this->command1s[iNumData] = 0;
 
-    this->time2s[iNumData ]=0.;
-    this->command2s[iNumData ]=0;
-    //this->data32s[iNumData ]=0;
-    //this->data22s[iNumData ]=0;
-    
+    this->time2s[iNumData] = 0.;
+    this->command2s[iNumData] = 0;
 
-    this->time3s[iNumData ]=.0;
-    this->command3s[iNumData ]=0;
-    //this->data33s[iNumData ]=0;
-    //this->data23s[iNumData ]=0;
+    this->time3s[iNumData] = .0;
+    this->command3s[iNumData] = 0;
 
-    this->time4s[iNumData ]=0.;
-    this->command4s[iNumData ]=0;
-    //this->data34s[iNumData ]=0;
-    this->data24s[iNumData ]=0;
-        
-     
+    this->time4s[iNumData] = 0.;
+    this->command4s[iNumData] = 0;
   }
 }
 //====================================================
@@ -123,46 +356,40 @@ void MidiApplication::initArrays4()
 {
   for (int iNumData = 0; iNumData < MAX_NB_MIDI_MESSAGES_TRK5; iNumData++)
   {
-    this->timeTrk5[iNumData ] = 0.;
-    this->commandTrk5[iNumData ] = 0;
-    //this->data2Trk5[iNumData ] = 0;
-    //this->data3Trk5[iNumData ] = 0;
-        
-     
+    this->timeTrk5[iNumData] = 0.;
+    this->commandTrk5[iNumData] = 0;
   }
 }
-
 
 void MidiApplication::init()
 {
   this->switch_on_off_trk3 = false;
   this->switch_on_off_trk2 = false;
   //=======bank init===================
-  this->sendMidiMessage(176, 0, 0); //bank1 
-//=========instruments init========================
-  this->sendMidiMessage(192, INSTR1_INIT); 
-  this->inst1=INSTR1_INIT;
+  this->sendMidiMessage(176, 0, 0); //bank1
+
+  this->sendMidiMessage(192, INSTR1_INIT);
+  this->inst1 = INSTR1_INIT;
   this->sendMidiMessage(193, INSTR2_INIT);
- this->inst2=INSTR2_INIT;
+  this->inst2 = INSTR2_INIT;
+  //this->sendMidiMessage(177,126);//Bass mono
   this->sendMidiMessage(194, INSTR3_INIT);
- this->inst3=INSTR3_INIT;
+  this->inst3 = INSTR3_INIT;
   this->sendMidiMessage(195, INSTR4_INIT);
- this->inst4=INSTR4_INIT;
+  this->inst4 = INSTR4_INIT;
   this->sendMidiMessage(196, INSTR5_INIT);
- this->inst5=INSTR5_INIT;
+  this->inst5 = INSTR5_INIT;
   this->sendMidiMessage(197, INSTR6_INIT);
- this->inst6=INSTR6_INIT;
+  this->inst6 = INSTR6_INIT;
   this->sendMidiMessage(198, INSTR7_INIT);
- this->inst7=INSTR7_INIT;
+  this->inst7 = INSTR7_INIT;
   this->sendMidiMessage(199, INSTR8_INIT);
- this->inst8=INSTR8_INIT;
+  this->inst8 = INSTR8_INIT;
 
+  this->sendMidiMessage(201, 1); //ch10
+  this->inst10 = 1;
 
-  this->sendMidiMessage(201, 1);//ch10
-  this->inst10=1;
-
-  
-//=============level init======================
+  //=============level init======================
   this->sendMidiMessage(176, 7, 90);
   this->sendMidiMessage(177, 7, 90);
   this->sendMidiMessage(178, 7, 90);
@@ -173,24 +400,56 @@ void MidiApplication::init()
   this->sendMidiMessage(183, 7, 90);
   this->sendMidiMessage(184, 7, 90);
   this->sendMidiMessage(185, 7, 90);
+
+  //this->sendMidiMessage(177,126);//Bass mono
 }
 //this->getDisplayer()->display(track->number);
-
+//===================================midi code input===============
 void MidiApplication::handleMidiCode()
 {
-  int data = this->getMidiStreamCurrentMidiCode();
-  //================== =metronome ==========================
+  //=================================================================
+  int data = this->getMidiStreamCurrentMidiCode(); //get midi code
+                                                   //=================================================================
 
-  //======================================================
-  //this->getDisplayer()->display(this->Ticks);
-
-  // this->midiCodeHandler->handleMidiCode(data);
-
+  if (this->flagExclusifSyst && this->command != 247)
+  {
+    this->data2 = data;
+    this->SendExclusifSyst();
+    return;
+  }
   //***********************************************************************************
   if (data > 253)
   {
+
     return; // other MIDI command
   }
+  //===================midi ticks================================================
+  if (this->command == 248)
+  {
+    this->MidiClock();
+    return;
+  }
+  //=========================exclusif system========================================
+  //===============flag syst excl========================
+  if (this->command == 240) //exclusif system start
+  {
+    this->flagExclusifSyst = true;
+    this->command = 0;
+    this->CodeExclusifSyst = 1;
+    this->SendExclusifSyst();
+    return;
+  }
+  if (this->command == 247) //exclusif system stop
+  {
+    this->flagExclusifSyst = false;
+    this->command = 0;
+    this->CodeExclusifSyst = 2;
+    this->SendExclusifSyst();
+    return;
+  }
+  //===================================================
+
+  //====================================================================================
 
   //************************* midi command **********************************************
   else if (data >= MIDI_STATUS_NOTE_OFF_FIRST_CANAL && data < 254)
@@ -205,7 +464,6 @@ void MidiApplication::handleMidiCode()
   else if (!this->flag)
   {
     this->flag = true;
-
     this->data2 = data;
     //this->getDisplayer()->display(this->commandInit);
     //============get data2 on control change==================
@@ -235,20 +493,18 @@ void MidiApplication::handleMidiCode()
   {
     this->flag = false;
     this->data3 = data;
-    //this->getDisplayer()->display(this->data2);
-    //this->essai=this->data2<<8;
-    //this->getDisplayer()->display(this->essai>>8 & 0x000000FF);
+    //=======================================================================================
+    //this->ChannelReplace();//replace channel
 
-    //======================
     if (this->Control_Button[29] == 29 && data3 == 0)
     {
-
       this->Control_Button[29] = 0;
       //this->getDisplayer()->display(this->Control_Button_Onlyon[29]);
     }
     //======================
     if (this->Control_Button[13] == 13 && data3 == 0)
       this->Control_Button[13] = 0;
+    //==========================================
 
     //====================get ch note on==========================
     if (this->isNoteOnCommand())
@@ -267,14 +523,17 @@ void MidiApplication::handleMidiCode()
       //this->getDisplayer()->display(this->data3);
     }
     //===============store control data2===============
-    if (this->data2 != 1 && this->data2 != 2 && this->data2 != 11 && this->data2 != 12 && this->data2 != 3){
-
-    this->StoreControlData2();
+    if (this->data2 != 1 && this->data2 != 2 && this->data2 != 11 && this->data2 != 12 && this->data2 != 3)
+    {
+      this->StoreControlData2();
     }
     //this->getDisplayer()->display(this->Control_Button[30]);
     //================================================
     this->StoreNoteondata2();
     //===============================================
+    this->StoreNoteonChord();
+    this->OnOffArranger();
+
     // if(this->StatusNoteon[96] == 96 && this->StatusNoteon[38] == 38 )
     // this->getDisplayer()->display("c'est good");
 
@@ -308,6 +567,12 @@ void MidiApplication::handleMidiCode()
       this->SpeedLed13 = LED_NORMAL;
     }
     //this->getDisplayer()->display(this->SpeedLed13);
+    //==================command with note96+note command number=========
+    if (this->StatusNoteon[36] == 36)
+    {
+      this->SetFx();
+    }
+    //==================================================================
   }
   //**************************bankchange**************************************************************
 
@@ -451,19 +716,39 @@ void MidiApplication::sendCurrentMidiMessage()
 
 void MidiApplication::sendMidiMessage(int command, int data2, int data3)
 {
+
   this->SwitchinTrk5b = false;
   if (command > 0)
   {
-    this->midiStream->write(command);
-    this->midiStream->write(data2);
-
-    if (data3 != UNDEFINED_MIDI_CODE) //Envoi data3 que si reçu en paramètre.
+    if (command != 148 && command != 132) //if not ch 5
     {
-      this->midiStream->write(data3);
+      //this->getDisplayer()->display(command);
+      this->midiStream->write(command);
+      this->midiStream->write(data2);
+      //this->getDisplayer()->display(data2);
+
+      if (data3 != UNDEFINED_MIDI_CODE) //Envoi data3 que si reçu en paramètre.
+      {
+        this->midiStream->write(data3);
+      }
+      this->SwitchinTrk5b = true;
     }
-    this->SwitchinTrk5b = true;
+    //============================ch 5 solo==================================
+    else if (command == 148 || command == 132)
+    {
+      if (data2 > 54)
+      {
+
+        this->midiStream->write(command);
+        this->midiStream->write(data2);
+        this->midiStream->write(data3);
+        this->SwitchinTrk5b = true;
+      }
+    }
+    //===================================================================
   }
 }
+//========================================================================
 
 //=========================================================================
 void MidiApplication::sendMidiMessageMg(int commandm, int data2m, int data3m)
@@ -500,19 +785,18 @@ void MidiApplication::sendMidiMessageMg(int commandm, int data2m, int data3m)
   {
     if (this->SwitchinTrk5b)
     {
-      //this->getDisplayer()->display(this->midiCodeIndex_Trk5);
-      if(this->midiCodeIndex_Trk5 == 1)
-      {
-      this->tempotrk5=this->x_count;  
+      //this->getDisplayer()->display("rec33");
       this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
-      this->commandTrk5[this->midiCodeIndex_Trk5] = commandm<<16 |data2m<<8 |data3m ;
-      this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
+      if (this->midiCodeIndex_Trk5 == 1)
+      {
+        this->tempotrk5 = this->x_count;
+        this->commandTrk5[1] = this->inst5 << 24 | commandm << 16 | data2m << 8 | data3m; //stat mid
+        this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;
       }
-      else 
+      else
       {
-      this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
-      this->commandTrk5[this->midiCodeIndex_Trk5] = commandm<<16 |data2m<<8 |data3m ;
-      this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
+        this->commandTrk5[this->midiCodeIndex_Trk5] = commandm << 16 | data2m << 8 | data3m; //stat mid
+        this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;                                 //put 0 in index array + 1
       }
       this->midiCodeIndex_Trk5 += 1;
       this->startloopRectrk5();
@@ -618,7 +902,7 @@ void MidiApplication::handleControlChangeCommand()
     this->Switchbeat3 = true;
     this->Switchbeat4 = true;
     this->Switchbeat1 = true;
-    this->beat1 = 24.;
+    this->beat1 = 48.;
   }
   else if (this->data2 == 18 && this->data3 == 0)
   {
@@ -650,6 +934,7 @@ void MidiApplication::handleControlChangeCommand()
     //=====================stop all channels===========================
     else if (this->data2 == 14) // ************* Stop all channels *************
     {
+      this->transp = 0;
       this->Turnoffallchannels();
 
       this->Control_Button[29] = 0;
@@ -685,8 +970,6 @@ void MidiApplication::handleControlChangeCommand()
       this->data3 = 0;
       this->SdtoDataMid = true;
     }
-
-
 
     //=======================================================================
     else if (this->data2 == 7) //1) // ******** Level control channel*************
@@ -757,16 +1040,17 @@ void MidiApplication::handleControlChangeCommand()
     //=================== startrec1 ============================
     else if (this->data2 == 20) // ************* Rec track 1 *************
     {
+
       //=========reset arrays track 1======================
       for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
       {
         this->command1s[i] = 0;
         this->time1s[i] = 0;
         //this->data21s[i] = 0;
-       // this->data31s[i] = 0;
+        // this->data31s[i] = 0;
         //this->getDisplayer()->display(i);
 
-         //this->track1->essai2= 0;
+        //this->track1->essai2= 0;
         // this->track1->times[i] = 0;
         // this->track1->data2[i] = 0;
         // this->track1->data3[i] = 0;
@@ -774,8 +1058,8 @@ void MidiApplication::handleControlChangeCommand()
       //=========init array "delete nt off track 1"==================
       for (int i = 0; i < 100; i++)
       {
-        this->Store_Vel_Run_NT_Track1[i] = 0;
-        this->Store_Vel_Run_ST_Track1[i] = 0;
+        this->Store_Run_NT_Track1[i] = 0;
+        this->Store_Run_ST_Track1[i] = 0;
       }
       //==================================
       this->data3 = 0;
@@ -787,88 +1071,6 @@ void MidiApplication::handleControlChangeCommand()
       return;
     }
 
-    // //================ startrec2 ==================================
-    // else if (this->Control_Button[13] > 0 && this->Control_Button[30] == 30) // ************* Rec track 4 ************* //if (this->Control_Button_Onlyon[21] == 21) // ************* Rec track 2 *************
-    // {
-    //   this->FirstNoteTrk2 = true;
-    //   this->Control_Button_Onlyon[30] = 0;
-    //   if (this->play_loop2)
-    //   {
-    //     this->play_loop2 = false;
-    //     this->play_2_ok = false;
-    //     this->Flag_Send_trk2 = false;
-    //     this->TurnoffNtonLoopTrack2();
-    //   }
-    //   //this->getDisplayer()->display("rec2");
-    //   this->data_trk_2 = false;
-    //   this->start_rec_2 = true;
-    //   this->rec_1_ok = false;
-    //   //int i = 0;
-    //   //=============reset arrays track 2=========================
-    //   for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
-    //   {
-
-    //     this->command2s[i] = 0;
-    //     this->time2s[i] = 0;
-    //     this->data22s[i] = 0;
-    //     this->data32s[i] = 0;
-    //   }
-    //   //=========init array "delete nt off track 2"==================
-    //   for (int i = 0; i < 100; i++)
-    //   {
-    //     this->Store_Vel_Run_NT_Track2[i] = 0;
-    //     this->Store_Vel_Run_ST_Track2[i] = 0;
-    //   }
-    //   //================================================
-    //   this->rec_2_ok = true;
-
-    //   this->midiCodeIndex_2 = 0;
-    //   this->data3 = 0;
-    //   //this->Ticks = 0.;
-    // }
-    //=============startrec3================================
-    // else if (this->Control_Button[22] == 22) // ************* Rec track 3 *************
-    // {
-    //   this->FirstNoteTrk3 = true;
-    //   this->Control_Button[22] = 0;
-    //   //this->getDisplayer()->display("startrec31");
-    //   if (this->play_loop3)
-    //   {
-    //     this->play_loop3 = false;
-    //     this->play_3_ok = false;
-    //     this->Flag_Send_trk3 = false;
-    //     this->TurnoffNtonLoopTrack3();
-    //   }
-
-    //   this->data_trk_3 = false;
-    //   this->start_rec_3 = true;
-    //   this->rec_1_ok = false;
-    //   this->rec_2_ok = false;
-    //   this->rec_4_ok = false;
-    //   this->start_rec_Trk5 = false;
-    //   //int i = 0;
-    //   //=============reset arrays track 3=========================
-    //   for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
-    //   {
-    //     this->command3s[i] = 0;
-    //     this->time3s[i] = 0;
-    //     this->data23s[i] = 0;
-    //     this->data33s[i] = 0;
-    //   }
-    //   //=========init array "delete nt off track 2"==================
-    //   for (int i = 0; i < 100; i++)
-    //   {
-    //     this->Store_Vel_Run_NT_Track3[i] = 0;
-    //     this->Store_Vel_Run_ST_Track3[i] = 0;
-    //   }
-    //   //================================================
-    //   this->rec_3_ok = true;
-
-    //   this->midiCodeIndex_3 = 0;
-    //   this->data3 = 0;
-    // }
-    //======================================================
-
     //======================================================
     //================== startplay1 ==============================
     else if (this->data2 == 15) // ************* Switch play "on" *************
@@ -879,13 +1081,22 @@ void MidiApplication::handleControlChangeCommand()
       this->Ticks = 0.;
       this->midiCodeIndex_1 = 0;
       this->data3 = 0;
+      this->x_count = this->tempotrk1;
+      //====================setinstrument===================
+      if (this->command1s[1])
+      {
+        this->inst1 = this->command1s[1] >> 24 & 0x00000000FF;
+        this->command = 192;
+        this->inst = this->inst1;
+        this->sendProgramChange();
+      }
       //=======================================
 
       //=================================
       if (this->start_sync)
       {
         //=========start play 2============
-        if (data_trk_2) //if track2 not empty
+        if (this->data_trk_2) //if track2 not empty
         {
           this->midiCodeIndex_2 = 0;
           this->data3 = 0;
@@ -893,14 +1104,15 @@ void MidiApplication::handleControlChangeCommand()
           this->flag_play_2 = true;
         }
         //========startplay3==================
-        if (data_trk_3) //if track3 not empty
+        if (this->data_trk_3) //if track3 not empty
         {
+
           this->midiCodeIndex_3 = 0;
           this->data3 = 0;
           this->play_3_ok = true;
           this->flag_play_3 = true;
         }
-        if (data_trk_4) //if track3 not empty
+        if (this->data_trk_4) //if track3 not empty
         {
           this->midiCodeIndex_4 = 0;
           this->data3 = 0;
@@ -918,78 +1130,6 @@ void MidiApplication::handleControlChangeCommand()
         //==================================
       }
     }
-    // //================ startplay2 =============================
-    // if (this->Control_Button[30] == 30 && this->Control_Button[13] == 0 && !this->switch_on_off_trk2) //if (this->data2 == 16 && this->data_trk_2) // ************* Play track 2 *************
-    // {
-    //   this->start_rec_2 = false;
-    //  // this->Control_Button[30] = 1;
-
-    //   if (!this->switch_on_off_trk2)
-    //   {
-
-    //     if (!this->play_loop)
-    //     {
-    //       this->data3 = 0;
-    //       this->play_2_ok = true;
-    //       this->flag_play_2 = true;
-    //       this->Flag_Send_trk2 = true;
-    //       this->switch_on_off_trk2 = true;
-    //     }
-    //     else
-    //     {
-
-    //       this->Flag_Send_trk2 = true;
-    //       this->switch_on_off_trk2 = true;
-    //     }
-    //   }
-    // }
-    // //====================== stopplay2 ====================================
-    // if (this->Control_Button[30] == 0 && this->Control_Button[13] == 0 && this->switch_on_off_trk2) //this->control28 == 28) //else
-    // {
-
-    //   //this->Control_Button[30] = 1;
-
-    //   this->switch_on_off_trk2 = false;
-
-    //   this->Flag_Send_trk2 = false;
-
-    //   this->TurnoffNtonLoopTrack2();
-    // }
-
-    //====================== startplay3 ==============================
-    //   else if (this->Control_Button[31] == 31 && this->Control_Button[13] == 0) //this->control28 == 28)//(this->data2 == 17 && this->data_trk_3) // ************* Play track 3 *************
-    //   {
-    //     this->Control_Button[31] = 0;
-    //     this->start_rec_3 = false;
-    //     //this->getDisplayer()->display(this->switch_on_off_trk3);
-    //     if (!this->switch_on_off_trk3)
-    //     {
-    //       if (!this->play_loop)
-    //       {
-    //         this->data3 = 0;
-    //         this->play_3_ok = true;
-    //         this->flag_play_3 = true;
-    //         this->Flag_Send_trk3 = true;
-    //         this->switch_on_off_trk3 = true;
-    //       }
-    //       else
-    //       {
-
-    //         this->Flag_Send_trk3 = true;
-    //         this->switch_on_off_trk3 = true;
-    //       }
-    //     }
-    //     //================== stopplay3 ================================
-    //     else if (this->Control_Button[31] == 0 && this->Control_Button[13] == 0) // else
-    //     {
-    //       this->Control_Button[31] = 1;
-    //       this->switch_on_off_trk3 = false;
-
-    //       this->Flag_Send_trk3 = false;
-
-    //       this->TurnoffNtonLoopTrack3();
-    //     }
-    //   }
 
   } // } //FIN : if (this->data3 > 0)
 
@@ -999,6 +1139,7 @@ void MidiApplication::handleControlChangeCommand()
   //===================call methods===================================
   //this->track1->essai();
   //this->getDisplayer()->display(this->track1->fr);
+
   this->StartRecTrack2();
   this->StartRecTrack3();
   this->StartRecTrack4(); //startrec trk5
@@ -1056,7 +1197,7 @@ void MidiApplication::prgm_chg_inst()
     break;
   }
 }
-
+//============================prog chang===========================
 void MidiApplication::sendProgramChange()
 {
   this->sendMidiMessage(this->command, this->inst);
@@ -1080,6 +1221,7 @@ void MidiApplication::record_1()
     this->midiCodeIndex_1 = 0; //index track 1
     this->start_rec_1 = true;  //flag start rec_1
     this->Ticks = 0.;          //ticks reset
+    this->MidiTicks = 1;
   }
   //***************stop record and play loop************************
 
@@ -1138,7 +1280,6 @@ void MidiApplication::record_2()
     }
     //======================================
   }
-  this->startloopRectrk2();
 
   //this->getDisplayer()->display("rec22");
   //==========store data mid==================
@@ -1151,6 +1292,7 @@ void MidiApplication::record_2()
     if (this->FirstNoteTrk2)
     {
       this->StoreDataTrk2();
+      this->startloopRectrk2();
     }
   }
   // }
@@ -1282,25 +1424,42 @@ void MidiApplication::record_4()
 //**************************play1****************************************
 void MidiApplication::play_1()
 {
-  
+  //this->getDisplayer()->display(this->Store_Run_ST_Track1[36]);
 
-  //int i=  Track->telleMethodeDeLaClasseTrack():
-  //this->getDisplayer()->display(2342);
   if (this->midiCodeIndex_1 < MAX_NB_MIDI_MESSAGES && this->data_trk_1)
+
   {
-    //this->x_count = this->tempotrk1;
-    //this->getDisplayer()->display(this->midiCodeIndex_1);
+    //this->getDisplayer()->display(this->ChordNumber);
+    // if (!this->start_rec_2)
+    // {
+    //this->getDisplayer()->display("play_1");
+    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF);
+    // this->NoteInitPlay1_In = this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF;
+    // this->NoteTabChord1 = this->TabConvertData2[this->ChordType][this->NoteInitPlay1_In];
+
+    // if ((this->ChordNumber != this->ChordNumberTp1) && this->SwitchArranger )
+    // {
+    //   //this->getDisplayer()->display("play_1");
+    //   this->ChordNumberTp1 = this->ChordNumber;
+
+    //   this->ChangePlayNoteChord1();
+
+    //   //this->getDisplayer()->display("play_2");
+
+    // }
+    // }
+
     if (this->Ticks >= this->time1s[this->midiCodeIndex_1])
     {
-      if (this->command1s[this->midiCodeIndex_1 + 3]  == LOOP_TRACK)
+      if (this->command1s[this->midiCodeIndex_1 + 3] == LOOP_TRACK)
       {
         this->switchOffAllTracksRec();
       }
-      
+
       if (this->command1s[this->midiCodeIndex_1] == LOOP_TRACK)
 
       {
-        
+
         //===stop rec/start syncro loop======================
         if (this->start_rec_2 && this->data_trk_2)
         {
@@ -1323,13 +1482,7 @@ void MidiApplication::play_1()
           this->Flag_Send_trk4 = false;
           this->play_4_ok = true;
         }
-        /*if (this->start_rec_Trk5 && data_Trk5)
-        {
-          this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;
-          this->start_rec_Trk5 = false;
-          this->Flag_Send_Trk5 = false;
-          this->play_Trk5 = true;
-        }*/
+
         //============================================================
         //this->getDisplayer()->display("play_1");
         if (this->data_trk_2 && !this->start_rec_2)
@@ -1363,17 +1516,6 @@ void MidiApplication::play_1()
           }
         }
 
-        /* if (this->data_Trk5 && !this->start_rec_Trk5)
-        {
-          if (this->start_sync)
-          {
-            this->TurnoffNtonLoopTrk5();
-            this->play_Trk5 = true;
-            this->flag_Play_Trk5 = true;
-            this->Flag_Send_Trk5 = true;
-          }
-        }*/
-
         this->Ticks = 0.;
         this->midiCodeIndex_1 = 0;
         this->midiCodeIndex_2 = 0;
@@ -1384,29 +1526,56 @@ void MidiApplication::play_1()
 
         return;
       }
-      //=======================================================================
-      
+      //====================channel noteonoff================================
+      this->ChPlay1 = getCommandChannel(this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF);
+      //=====================================================================
 
-      
-      this->sendMidiMessage(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF,//command
-                             this->command1s[this->midiCodeIndex_1] >>8 & 0x000000FF,//data2
-                             this->command1s[this->midiCodeIndex_1] & 0x000000FF);//data3
+      this->NoteInitPlay1_In = this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF;
+      this->NoteTabChord1 = this->TabConvertData2[this->ChordType][this->NoteInitPlay1_In];
 
-      this->StoreRuningNoteTrk1();
+      if ((!this->SwitchArranger) || (this->ChPlay1 == 10))
+
+      {
+        //this->getDisplayer()->display(this->ChordNumber);
+
+        this->NoteTabChord1 = this->NoteInitPlay1_In;
+        this->transpT1 = 0;
+      }
+
+      if ((this->ChordNumber != this->ChordNumberTp1) && (this->SwitchArranger) && (this->ChPlay1 != 10))
+      {
+        this->getDisplayer()->display("play2");
+
+        this->ChordNumberTp1 = this->ChordNumber;
+        this->transpT1 = this->ChordTranspose;
+
+        this->ChangePlayNoteChord1();
+      }
+
+      //  if((( this->Store_Run_NT_Track1[this->NoteTabChord1 + this->transp] != this->NoteTabChord1)
+      //  && (this->WaitNextChord)) || this->transp==0)
+      //  {
+
+      this->sendMidiMessage(this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF, //command
+                            (this->NoteTabChord1 + this->transpT1),                    //data2
+                            this->command1s[this->midiCodeIndex_1] & 0x000000FF);      //data3
+
+      this->StoreRuningNoteTrk1(this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF,
+                                this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF, this->command1s[this->midiCodeIndex_1] & 0x000000FF); //data3
+
+      //}
       if (this->command1s[this->midiCodeIndex_1 + 1] == 0)
       {
-        
+
         this->play_1_ok = false;
       }
 
-      
-      this->sendMidiMessageMg(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF,//command
-                             this->command1s[this->midiCodeIndex_1] >>8 & 0x000000FF,//data2
-                             this->command1s[this->midiCodeIndex_1] & 0x000000FF);//data3
+      this->sendMidiMessageMg(this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF, //command
+                              this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF,  //data2
+                              this->command1s[this->midiCodeIndex_1] & 0x000000FF);      //data3
 
       this->midiCodeIndex_1 += 1;
     }
-
   }
   return;
 }
@@ -1416,48 +1585,70 @@ void MidiApplication::play_2()
 
   //this->getDisplayer()->display(this->midiCodeIndex_2);
   if (this->midiCodeIndex_2 < MAX_NB_MIDI_MESSAGES && this->data_trk_2)
+
   {
+    this->NoteInitPlay2_In = this->command2s[this->midiCodeIndex_2] >> 8 & 0x000000FF;
+    this->NoteTabChord2 = this->TabConvertData2[this->ChordType][this->NoteInitPlay2_In];
+
+    if (!this->SwitchArranger)
+    {
+      this->NoteTabChord2 = this->NoteInitPlay2_In;
+      this->transp = 0;
+    }
+
+    if (this->ChordNumber != this->ChordNumberTp2 && this->SwitchArranger)
+    {
+      this->ChordNumberTp2 = this->ChordNumber;
+
+      this->ChangePlayNoteChord2();
+    }
 
     if (this->Ticks >= this->time2s[this->midiCodeIndex_2])
     {
-
-      if (this->command2s[this->midiCodeIndex_2] == 98) //rebouclage
-
+      if (!this->play_loop) //if not runing track1(master track)
       {
-        //this->getDisplayer()->display("play1rebl");
-
-        //this->getDisplayer()->display("play_1");
-        this->start_rec_2 = false;
-        this->Ticks = 0.;
-        this->midiCodeIndex_2 = 0;
-        this->TurnoffNtonLoopTrack2();
-        return;
+        if (this->command2s[this->midiCodeIndex_2] == 98) //rebouclage
+        {
+          //this->getDisplayer()->display("play_1");
+          this->start_rec_2 = false;
+          this->Ticks = 0.;
+          this->midiCodeIndex_2 = 0;
+          this->TurnoffNtonLoopTrack2();
+          return;
+        }
       }
 
       //this->getDisplayer()->display("play_222");
       if (this->Flag_Send_trk2 && this->data_trk_2)
       {
+        // this->NoteInitPlay2_In = this->command2s[this->midiCodeIndex_2] >> 8 & 0x000000FF;
+        // this->NoteTabChord2 = this->TabConvertData2[this->ChordType][this->NoteInitPlay2_In];
 
-        
-      this->sendMidiMessage(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF,//command
-                             this->command2s[this->midiCodeIndex_2] >>8 & 0x000000FF,//data2
-                             this->command2s[this->midiCodeIndex_2] & 0x000000FF);//data3
+        // if (this->ChordNumber != this->ChordNumberTp2 && this->SwitchArranger)
+        // {
+        //   this->ChordNumberTp2 = this->ChordNumber;
 
-      this->StoreRuningNoteTrk2();
-      if (this->command2s[this->midiCodeIndex_2 + 1] == 0)
-      {
-        
-        this->play_2_ok = false;
+        //   this->ChangePlayNoteChord2();
+        // }
+
+        this->sendMidiMessage(this->command2s[this->midiCodeIndex_2] >> 16 & 0x000000FF, //command
+                              (this->NoteTabChord2 + this->transp),                      //data2
+                              this->command2s[this->midiCodeIndex_2] & 0x000000FF);      //data3                   //data3
+
+        this->StoreRuningNoteTrk2(this->command2s[this->midiCodeIndex_2] >> 16 & 0x000000FF, this->NoteInitPlay2_In,
+                                  this->command2s[this->midiCodeIndex_2] & 0x000000FF); //data3
+
+        if (this->command2s[this->midiCodeIndex_2 + 1] == 0)
+        {
+
+          this->play_2_ok = false;
+        }
+
+        this->sendMidiMessageMg(this->command2s[this->midiCodeIndex_2] >> 16 & 0x000000FF, //command
+                                this->command2s[this->midiCodeIndex_2] >> 8 & 0x000000FF,  //data2
+                                this->command2s[this->midiCodeIndex_2] & 0x000000FF);      //data3
       }
 
-      
-      this->sendMidiMessageMg(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF,//command
-                             this->command2s[this->midiCodeIndex_2] >>8 & 0x000000FF,//data2
-                             this->command2s[this->midiCodeIndex_2] & 0x000000FF);//data3
-
-      
-      }
-      
       if (this->command2s[this->midiCodeIndex_2] == 0 && !this->play_loop)
       {
         //this->getDisplayer()->display("play1zero");
@@ -1477,45 +1668,68 @@ void MidiApplication::play_3()
 {
 
   //this->getDisplayer()->display("play3");
-  if (this->midiCodeIndex_3 < MAX_NB_MIDI_MESSAGES && this->data_trk_3)
+  if ((this->midiCodeIndex_3 < MAX_NB_MIDI_MESSAGES) && this->data_trk_3)
   {
+
+    // if ((this->ChordNumber != this->ChordNumberTp3) && (this->SwitchArranger))
+    //     {
+    //       this->ChordNumberTp3 = this->ChordNumber;
+
+    //       this->ChangePlayNoteChord3();
+    //     }
+
     if (this->Ticks >= this->time3s[this->midiCodeIndex_3])
     {
-      if (this->command3s[this->midiCodeIndex_3] == 98) //rebouclage
-
+      if (!this->play_loop) //if not runing track1(master track)
       {
+        if (this->command3s[this->midiCodeIndex_3] == 98) //rebouclage
+        {
 
-        //this->getDisplayer()->display("play_1");
-        this->start_rec_3 = false;
-        this->Ticks = 0.;
-        this->midiCodeIndex_3 = 0;
-
-        this->TurnoffNtonLoopTrack3();
-
-        return;
+          this->start_rec_3 = false;
+          this->Ticks = 0.;
+          this->midiCodeIndex_3 = 0;
+          this->TurnoffNtonLoopTrack3();
+          return;
+        }
       }
       //this->getDisplayer()->display("play_2");
       if (this->Flag_Send_trk3 && this->data_trk_3)
       {
-        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF,//command
-                             this->command3s[this->midiCodeIndex_3] >>8 & 0x000000FF,//data2
-                             this->command3s[this->midiCodeIndex_3] & 0x000000FF);//data3
 
-      this->StoreRuningNoteTrk3();
-      if (this->command3s[this->midiCodeIndex_3 + 1] == 0)
-      {
-        
-        this->play_3_ok = false;
+        this->NoteInitPlay3_In = this->command3s[this->midiCodeIndex_3] >> 8 & 0x000000FF;
+        this->NoteTabChord3 = this->TabConvertData2[this->ChordType][this->NoteInitPlay3_In];
+
+        if (!this->SwitchArranger)
+        {
+          this->NoteTabChord3 = this->NoteInitPlay3_In;
+          this->transp = 0;
+        }
+
+        if ((this->ChordNumber != this->ChordNumberTp3) && (this->SwitchArranger))
+        {
+
+          this->ChordNumberTp3 = this->ChordNumber;
+
+          this->ChangePlayNoteChord3();
+        }
+
+        this->sendMidiMessage(this->command3s[this->midiCodeIndex_3] >> 16 & 0x000000FF, //command
+                              (this->NoteTabChord3 + this->transp),                      //data2
+                              this->command3s[this->midiCodeIndex_3] & 0x000000FF);      //data3                   //data3
+
+        this->StoreRuningNoteTrk3(this->command3s[this->midiCodeIndex_3] >> 16 & 0x000000FF, this->NoteInitPlay3_In,
+                                  this->command3s[this->midiCodeIndex_3] & 0x000000FF); //data3
+
+        if (this->command3s[this->midiCodeIndex_3 + 1] == 0)
+        {
+
+          this->play_3_ok = false;
+        }
+
+        this->sendMidiMessageMg(this->command3s[this->midiCodeIndex_3] >> 16 & 0x000000FF, //command
+                                this->command3s[this->midiCodeIndex_3] >> 8 & 0x000000FF,  //data2
+                                this->command3s[this->midiCodeIndex_3] & 0x000000FF);      //data3
       }
-
-      
-      this->sendMidiMessageMg(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF,//command
-                             this->command3s[this->midiCodeIndex_3] >>8 & 0x000000FF,//data2
-                             this->command3s[this->midiCodeIndex_3] & 0x000000FF);//data3
-
-      
-      }
-     
 
       if (this->command3s[this->midiCodeIndex_3] == 0 && !this->play_loop)
       {
@@ -1541,34 +1755,63 @@ void MidiApplication::play_4()
   {
     if (this->Ticks >= this->time4s[this->midiCodeIndex_4])
     {
-      if (this->data24s[this->midiCodeIndex_4] == 98) //rebouclage
-
+      if (!this->play_loop) //if not runing track1(master track)
       {
-
-        //this->getDisplayer()->display("play_1");
-        this->start_rec_4 = false;
-        this->Ticks = 0.;
-        this->midiCodeIndex_4 = 0;
-
-        this->TurnoffNtonLoopTrack4();
-
-        return;
+        if (this->command4s[this->midiCodeIndex_4] == 98) //rebouclage
+        {
+          //this->getDisplayer()->display("play_1");
+          this->start_rec_4 = false;
+          this->Ticks = 0.;
+          this->midiCodeIndex_4 = 0;
+          this->TurnoffNtonLoopTrack4();
+          return;
+        }
       }
       //this->getDisplayer()->display("play_2");
       if (this->Flag_Send_trk4 && this->data_trk_4)
       {
-        this->sendMidiMessage(this->command4s[this->midiCodeIndex_4],
-                            this->data24s[this->midiCodeIndex_4] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data24s[this->midiCodeIndex_4] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
+        //====================channel noteonoff================================
+        this->ChPlay4 = getCommandChannel(this->command4s[this->midiCodeIndex_4] >> 16 & 0x000000FF);
+        //=====================================================================
 
-        if (this->start_rec_Trk5)
+        this->NoteInitPlay4_In = this->command4s[this->midiCodeIndex_4] >> 8 & 0x000000FF;
+        this->NoteTabChord4 = this->TabConvertData2[this->ChordType][this->NoteInitPlay4_In];
+
+        if ((!this->SwitchArranger) || (this->ChPlay4 == 10))
+
         {
-          this->sendMidiMessageMg(this->command4s[this->midiCodeIndex_4],
-                            this->data24s[this->midiCodeIndex_4] >>8 & 0x000000FF,//this->data21s[this->midiCodeIndex_1],
-                            this->data24s[this->midiCodeIndex_4] & 0x000000FF);//this->data31s[this->midiCodeIndex_1]);
+
+          this->NoteTabChord4 = this->NoteInitPlay4_In;
+          this->transpT4 = 0;
         }
+
+        if ((this->ChordNumber != this->ChordNumberTp4) && (this->SwitchArranger) && (this->ChPlay4 != 10))
+        {
+          //this->getDisplayer()->display(this->ChPlay1);
+
+          this->ChordNumberTp4 = this->ChordNumber;
+          this->transpT4 = this->ChordTranspose;
+
+          this->ChangePlayNoteChord4();
+        }
+
+        this->sendMidiMessage(this->command4s[this->midiCodeIndex_4] >> 16 & 0x000000FF, //command
+                              (this->NoteTabChord4 + this->transpT4),                    //data2
+                              this->command4s[this->midiCodeIndex_4] & 0x000000FF);      //data3
+
+        this->StoreRuningNoteTrk4(this->command4s[this->midiCodeIndex_4] >> 16 & 0x000000FF, this->NoteInitPlay4_In,
+                                  this->command4s[this->midiCodeIndex_4] & 0x000000FF); //data3
+
+        if (this->command4s[this->midiCodeIndex_4 + 1] == 0)
+        {
+
+          this->play_4_ok = false;
+        }
+
+        this->sendMidiMessageMg(this->command4s[this->midiCodeIndex_4] >> 16 & 0x000000FF, //command
+                                this->command4s[this->midiCodeIndex_4] >> 8 & 0x000000FF,  //data2
+                                this->command4s[this->midiCodeIndex_4] & 0x000000FF);      //data3
       }
-      this->StoreRuningNoteTrk4(); //store runing note/delete note "off"
 
       if (this->command4s[this->midiCodeIndex_4] == 0 && !this->play_loop)
       {
@@ -1622,149 +1865,196 @@ void MidiApplication::sendPitchBend()
 //*********************************************************************
 void MidiApplication::TurnoffNtonLoopTrack1()
 {
+
   //this->getDisplayer()->display("pass 1");
-  int indexDel = 0;
-  for (indexDel = 0; indexDel < 100; indexDel++)
+  int indexDel = 12;
+  for (indexDel = 12; indexDel < 96; indexDel++)
   {
-    if (this->Store_Vel_Run_NT_Track1[indexDel] > 0)
+    if (this->Store_Run_NT_Track1[indexDel] > 0)
     {
-      this->midiStream->write(this->Store_Vel_Run_ST_Track1[indexDel]);
-      this->midiStream->write(this->Store_Vel_Run_NT_Track1[indexDel]);
+      this->midiStream->write(this->Store_Run_ST_Track1[indexDel]);
+      this->midiStream->write(this->Store_Run_NT_Track1[indexDel] + this->NoteTransposeTrk1[indexDel]);
       this->midiStream->write(1);
-      //this->getDisplayer()->display(this->Store_Vel_Run_ST_Track1[indexDel]);
-      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track1[indexDel]);
     }
   }
 }
+//===========================================================================
 
 //==================delete runing note on loop track 2============
 
 void MidiApplication::TurnoffNtonLoopTrack2()
 {
-  int indexDel = 0;
-  for (indexDel = 0; indexDel < 100; indexDel++)
+
+  //this->getDisplayer()->display("pass 1");
+  int indexDel = 12;
+  for (indexDel = 12; indexDel < 96; indexDel++)
   {
-    if (this->Store_Vel_Run_NT_Track2[indexDel] > 0)
+    if (this->Store_Run_NT_Track2[indexDel] > 0)
     {
-      this->midiStream->write(Store_Vel_Run_ST_Track2[indexDel]);
-      this->midiStream->write(this->Store_Vel_Run_NT_Track2[indexDel]);
+      this->midiStream->write(this->Store_Run_ST_Track2[indexDel]);
+      this->midiStream->write(this->Store_Run_NT_Track2[indexDel] + this->NoteTransposeTrk2[indexDel]);
       this->midiStream->write(1);
-      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track2[indexDel]);
     }
   }
 }
-
-
-
+//==============================================================
 void MidiApplication::TurnoffNtonLoopTrack3()
 {
-  int indexDel = 0;
-  for (indexDel = 0; indexDel < 100; indexDel++)
+  int indexDel = 12;
+  for (indexDel = 12; indexDel < 96; indexDel++)
   {
-    if (this->Store_Vel_Run_NT_Track3[indexDel] > 0)
+    if (this->Store_Run_NT_Track3[indexDel] > 0)
     {
-      this->midiStream->write(Store_Vel_Run_ST_Track3[indexDel]);
-      this->midiStream->write(this->Store_Vel_Run_NT_Track3[indexDel]);
+      this->midiStream->write(this->Store_Run_ST_Track3[indexDel]);
+      this->midiStream->write(this->Store_Run_NT_Track3[indexDel] + this->NoteTransposeTrk3[indexDel]);
       this->midiStream->write(1);
-      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track2[indexDel]);
+      //this->getDisplayer()->display(this->Store_Run_NT_Track2[indexDel]);
     }
   }
 }
+//==============================================================
 void MidiApplication::TurnoffNtonLoopTrack4()
 {
-  int indexDel = 0;
-  for (indexDel = 0; indexDel < 100; indexDel++)
+  int indexDel = 12;
+  for (indexDel = 12; indexDel < 100; indexDel++)
   {
-    if (this->Store_Vel_Run_NT_Track4[indexDel] > 0)
+    if (this->Store_Run_NT_Track4[indexDel] > 0)
     {
-      this->midiStream->write(Store_Vel_Run_ST_Track4[indexDel]);
-      this->midiStream->write(this->Store_Vel_Run_NT_Track4[indexDel]);
+      this->midiStream->write(this->Store_Run_ST_Track4[indexDel]);
+      this->midiStream->write(this->Store_Run_NT_Track4[indexDel] + this->NoteTransposeTrk4[indexDel]);
       this->midiStream->write(1);
-      //this->getDisplayer()->display(this->Store_Vel_Run_NT_Track2[indexDel]);
+      //this->getDisplayer()->display(this->Store_Run_NT_Track2[indexDel]);
     }
   }
 }
 
 //========store on note"on"/delete on note "off"=============
-void MidiApplication::StoreRuningNoteTrk2()
+void MidiApplication::StoreRuningNoteTrk2(int command, int data2, int data3)
 {
-  if (!this->isNoteOffCommand(this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF))//if status "note on"
-  {                                                                    //=data2
-    this->Store_Vel_Run_NT_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] =
-        this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF;//store note "on" in index note "on"
+  if (!this->isNoteOffCommand(command)) //if status "note on"
+  {
 
-    this->Store_Vel_Run_ST_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = this->command2s[this->midiCodeIndex_2]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
-   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
-    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
-  }         //store status in index note "on"
-  
+    this->Store_Run_NT_Track2[data2] = this->NoteTabChord2;
+    this->NoteTransposeTrk2[data2] = this->transp;
+    //===================storevel"on"========================================================
+    this->Store_Run_Vel_Track2[data2] = data3; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]=
+    //this->command1s[this->midiCodeIndex_1] & 0x000000FF;
+    //=======================================================================================
+    this->Store_Run_ST_Track2[data2] = command - 16; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] =
+                                                     //this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF -(16); //-16 = turn stat in "note off"
+    //=======================================================statusoff
+    //this->getDisplayer()->display(this->Store_Run_NT_Track1[(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]);
+  }
+
   else
   {
-    this->Store_Vel_Run_NT_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = 0;//index note "on" = 0
-    this->Store_Vel_Run_ST_Track2[this->command2s[this->midiCodeIndex_2]>>8 & 0x000000FF] = 0;//index stat =0
+    if (this->Store_Run_NT_OffTrack2[data2])
+    {
+      this->sendMidiMessage(this->Store_Run_ST_Track2[data2], this->Store_Run_NT_OffTrack2[data2], 1);
+      this->Store_Run_NT_OffTrack2[data2] = 0;
+    }
+    //=======================valueindextab=0=======================================
+    this->Store_Run_NT_Track2[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index note "on" = 0
+    this->Store_Run_ST_Track2[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index stat =0
+    this->Store_Run_Vel_Track2[data2] = 0;
+    this->NoteTransposeTrk2[data2] = 20;
   }
 }
-//this->getDisplayer()->display(Store_Vel_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]]);
+//this->getDisplayer()->display(Store_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]]);
 //===============================================================
-void MidiApplication::StoreRuningNoteTrk4()
+void MidiApplication::StoreRuningNoteTrk4(int command, int data2, int data3)
 {
-  if (!this->isNoteOffCommand(this->command4s[this->midiCodeIndex_4]))
+  //=================================================================status
+  if (!this->isNoteOffCommand(command)) //if status "note on"
   {
-
-    this->Store_Vel_Run_NT_Track4[this->data24s[this->midiCodeIndex_4]] =
-        this->data24s[this->midiCodeIndex_4];
-
-    this->Store_Vel_Run_ST_Track4[this->data24s[this->midiCodeIndex_4]] = this->command4s[this->midiCodeIndex_4] - 16; //-16 = turn in "note off"
+    this->Store_Run_NT_Track4[data2] = this->NoteTabChord4;
+    this->NoteTransposeTrk4[data2] = this->transpT4;
+    //===================storevel"on"========================================================
+    this->Store_Run_Vel_Track4[data2] = data3;
+    //=======================================================================================
+    this->Store_Run_ST_Track4[data2] = command - 16;
+    //=======================================================statusoff
+    //this->getDisplayer()->display(this->Store_Run_NT_Track1[(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]);
   }
   else
   {
-    this->Store_Vel_Run_NT_Track4[this->data24s[this->midiCodeIndex_4]] = 0;
-    this->Store_Vel_Run_ST_Track4[this->data24s[this->midiCodeIndex_4]] = 0;
+    //=======================valueindextab=0=======================================
+    if (this->Store_Run_NT_OffTrack4[data2] > 0)
+    {
+      this->sendMidiMessage(this->Store_Run_ST_Track4[data2], this->Store_Run_NT_OffTrack4[data2], 1);
+    }
+    this->Store_Run_NT_Track4[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index note "on" = 0
+    this->Store_Run_ST_Track4[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index stat =0
+    this->Store_Run_Vel_Track4[data2] = 0;
+    this->NoteTransposeTrk4[data2] = 20;
   }
 }
 
 //========store on note"on"/delete on note "off"=============
-void MidiApplication::StoreRuningNoteTrk1()
-{                                                                  //=command
-  if (!this->isNoteOffCommand(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF))//if status "note on"
-  {                                                                    //=data2
-    this->Store_Vel_Run_NT_Track1[this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF] =
-        this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF;//store note "on" in index note "on"
+void MidiApplication::StoreRuningNoteTrk1(int command, int data2, int data3)
+{
 
-    this->Store_Vel_Run_ST_Track1[this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF] = this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
-   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
-    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
-  }         //store status in index note "on"
-  
+  //=================================================================status
+  if (!this->isNoteOffCommand(command)) //if status "note on"
+  {
+    this->Store_Run_NT_Track1[data2] = this->NoteTabChord1;
+    this->NoteTransposeTrk1[data2] = this->transpT1;
+    //===================storevel"on"========================================================
+    this->Store_Run_Vel_Track1[data2] = data3;
+    //=======================================================================================
+    this->Store_Run_ST_Track1[data2] = command - 16;
+    //=======================================================statusoff
+    //this->getDisplayer()->display(this->Store_Run_NT_Track1[(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]);
+  }
   else
   {
-    this->Store_Vel_Run_NT_Track1[this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF] = 0;//index note "on" = 0
-    this->Store_Vel_Run_ST_Track1[this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF] = 0;//index stat =0
+    //=======================valueindextab=0=======================================
+    if (this->Store_Run_NT_OffTrack1[data2] > 0)
+    {
+      this->sendMidiMessage(this->Store_Run_ST_Track1[data2], this->Store_Run_NT_OffTrack1[data2], 1);
+    }
+    this->Store_Run_NT_Track1[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index note "on" = 0
+    this->Store_Run_ST_Track1[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index stat =0
+    this->Store_Run_Vel_Track1[data2] = 0;
+    this->NoteTransposeTrk1[data2] = 20;
   }
 }
-//this->getDisplayer()->display(Store_Vel_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]]);
+//this->getDisplayer()->display(Store_Run_NT_Track2[this->data22s[this->midiCodeIndex_2]]);
 //===============================================================
 
 //========store on note"on"/delete on note "off"=============
-void MidiApplication::StoreRuningNoteTrk3()
+void MidiApplication::StoreRuningNoteTrk3(int command, int data2, int data3)
 {
-  if (!this->isNoteOffCommand(this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF))//if status "note on"
-  {                                                                    //=data2
-    this->Store_Vel_Run_NT_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] =
-        this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF;//store note "on" in index note "on"
+  //=================================================================status
+  if (!this->isNoteOffCommand(command)) //if status "note on"
+  {
+    this->Store_Run_NT_Track3[data2] = this->NoteTabChord3;
+    this->NoteTransposeTrk3[data2] = this->transp;
+    //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp); //store note "on" in index note "on"
+    //===================storevel"on"========================================================
+    this->Store_Run_Vel_Track3[data2] = data3; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]=
+    //this->command1s[this->midiCodeIndex_1] & 0x000000FF;
+    //=======================================================================================
+    this->Store_Run_ST_Track3[data2] = command - 16; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] =
+                                                     //this->command1s[this->midiCodeIndex_1] >> 16 & 0x000000FF -(16); //-16 = turn stat in "note off"
+    //=======================================================statusoff
+    //this->getDisplayer()->display(this->Store_Run_NT_Track1[(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)]);
+  }
 
-    this->Store_Vel_Run_ST_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = this->command3s[this->midiCodeIndex_3]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
-   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
-    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
-  }         //store status in index note "on"
-  
   else
   {
-    this->Store_Vel_Run_NT_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = 0;//index note "on" = 0
-    this->Store_Vel_Run_ST_Track3[this->command3s[this->midiCodeIndex_3]>>8 & 0x000000FF] = 0;//index stat =0
+    //=======================valueindextab=0=======================================
+    if (this->Store_Run_NT_OffTrack3[data2])
+    {
+      this->sendMidiMessage(this->Store_Run_ST_Track3[data2], this->Store_Run_NT_OffTrack3[data2], 1);
+      this->Store_Run_NT_OffTrack3[data2] = 0;
+    }
+    this->Store_Run_NT_Track3[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index note "on" = 0
+    this->Store_Run_ST_Track3[data2] = 0; //(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF)+(this->transp)] = 0; //index stat =0
+    this->Store_Run_Vel_Track3[data2] = 0;
+    this->NoteTransposeTrk3[data2] = 20;
   }
 }
-//=============================================================================
 
 void MidiApplication::Inst_ChgCh1()
 {
@@ -1943,6 +2233,7 @@ void MidiApplication::Inst_ChgCh9()
 }
 void MidiApplication::Inst_ChgCh10()
 {
+  this->getDisplayer()->display(this->inst10);
   if (this->data2 == 12)
   {
     if (this->inst10 < 128)
@@ -2046,7 +2337,7 @@ void MidiApplication::BankChg()
 //============== storecommandcontrolchange ==================================
 void MidiApplication::StoreControlData2()
 {
-  if (this->command == 176 && this->data3 > 0 )
+  if (this->command == 176 && this->data3 > 0)
   {
     //this->control28 = 28;
     this->Control_Button[this->data2] = this->data2;
@@ -2068,20 +2359,126 @@ void MidiApplication::StoreNoteondata2()
   {
 
     this->StatusNoteon[this->data2] = this->data2;
-
+    this->fileNumberStl = this->data2;
     //this->getDisplayer()->display("this->command == 176 && this->data3 > 0");
   }
   else if (this->isNoteOffCommand())
   {
+    this->fileNumberStl = 96;
     this->StatusNoteon[this->data2] = 0;
+
     //this->getDisplayer()->display("this->command == 176 && this->data3 == 0");
   }
 }
 //=============================================================================================
+//============================== storenotechord =========================================
+void MidiApplication::StoreNoteonChord()
+{
+  if (this->SwitchArranger)
+  {
+    //this->getDisplayer()->display("nt_on");
+
+    if (this->isNoteOnCommand() && this->data2 < 55 && this->amountnoteschord <= 6)
+    {
+      //this->WaitNextChord=false;
+      //  this->getDisplayer()->display(this->Store_Run_Vel_Track1[23]);
+      //unsigned char i = 0;
+      if (this->amountnoteschord == 0)
+        this->resettabchord();
+
+      this->NoteChord[this->data2] = this->data2;
+      this->VelNoteChord[this->data2] = this->data3;
+      //this->getDisplayer()->display(this->NoteChord[this->data2]);
+
+      //this->data2 = 56;
+      if (this->amountnoteschord >= 2 && this->amountnoteschord < 5)
+      {
+        //this->Ticks-=2.0;
+        this->ChordCod = 0;
+        this->IndexBitDecal = 0;
+        for (int i = 36; i < 55; i++)
+        {
+          if (this->NoteChord[i] > 0 && this->NoteChord[i] < 55)
+          {
+            if (this->IndexBitDecal == 0)
+            {
+              this->FirstLeftNote = this->NoteChord[i] - 35;
+              // this->ChordCod = (this->NoteChord[i]-35) << 32 | this->ChordCod;
+              this->IndexBitDecal++;
+            }
+            else if (this->IndexBitDecal == 1)
+            {
+              this->ChordCod = this->NoteChord[i] - 35 << 24 | this->ChordCod;
+              this->IndexBitDecal++;
+            }
+            else if (this->IndexBitDecal == 2)
+            {
+              this->ChordCod = this->NoteChord[i] - 35 << 16 | this->ChordCod;
+              this->IndexBitDecal++;
+              this->DelayDecodChord = TIME_DELAY_CHORD;
+            }
+            else if (this->IndexBitDecal == 3)
+            {
+              this->ChordCod = this->NoteChord[i] - 35 << 8 | this->ChordCod;
+              this->IndexBitDecal++;
+              this->DelayDecodChord = TIME_DELAY_CHORD;
+            }
+            else if (this->IndexBitDecal == 4)
+            {
+              this->ChordCod = this->NoteChord[i] - 35;
+              this->IndexBitDecal = 0;
+              this->DelayDecodChord = TIME_DELAY_CHORD;
+              this->delay1 = 100;
+              this->delay2 = 100;
+              this->delay3 = 100;
+            }
+          }
+        }
+        //this->Ticks+=2.0;
+        // if(this->DelayDecodChord==0)
+        //this->getDisplayer()->display(abs (this->ChordCod*this->FirstLeftNote));
+      }
+      if (this->amountnoteschord <= 5)
+      {
+        this->amountnoteschord += 1; //incr amount notes
+      }
+      //==================================================================
+    }
+    else if (this->isNoteOffCommand() && this->data2 < 55 && this->amountnoteschord < 6)
+    {
+      if (this->amountnoteschord >= 0)
+      {
+        //this->IndTabNtChord = this->IndTabNtChordOff[this->data2];
+        this->NoteChord[this->data2] = 0;
+        this->VelNoteChord[this->data2] = 0;
+        //this->TabNtChord[this->IndTabNtChord] = 0;
+      }
+
+      if (this->amountnoteschord > 0)
+      {
+        this->amountnoteschord--; //decr amount notes
+      }
+      //this->data2 = 56;
+
+      //this->getDisplayer()->display( this->amountnoteschord);
+    }
+  }
+
+  //this->getDisplayer()->display(this->chordcod);
+}
+//===========================================================
+void MidiApplication::resettabchord()
+{
+  for (int i = 35; i < 55; i++)
+    this->NoteChord[i] = 0;
+}
+
+//===========================================================
+
 void MidiApplication::StartRecTrack2()
 {
   //================ startrec2 ==================================
-  if (this->Control_Button[13] > 0 && this->Control_Button[28] == 28) // ************* Rec track 4 ************* //if (this->Control_Button_Onlyon[21] == 21) // ************* Rec track 2 *************
+  if (this->Control_Button[13] > 0 && this->Control_Button[28] == 28)
   {
     this->FirstNoteTrk2 = true;
     this->Control_Button[28] = 1;
@@ -2103,16 +2500,22 @@ void MidiApplication::StartRecTrack2()
 
       this->command2s[i] = 0;
       this->time2s[i] = 0;
-     // this->data22s[i] = 0;
+      //this->data22s[i] = 0;
       //this->data32s[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
     for (int i = 0; i < 100; i++)
     {
-      this->Store_Vel_Run_NT_Track2[i] = 0;
-      this->Store_Vel_Run_ST_Track2[i] = 0;
+      this->Store_Run_NT_Track2[i] = 0;
+      this->Store_Run_ST_Track2[i] = 0;
     }
     //================================================
+
+    this->start_rec_3 = false;
+    this->rec_1_ok = false;
+
+    this->rec_4_ok = false;
+    this->start_rec_Trk5 = false;
     this->rec_2_ok = true;
 
     this->midiCodeIndex_2 = 0;
@@ -2154,8 +2557,8 @@ void MidiApplication::StartRecTrack3()
     //=========init array "delete nt off track 2"==================
     for (int i = 0; i < 100; i++)
     {
-      this->Store_Vel_Run_NT_Track3[i] = 0;
-      this->Store_Vel_Run_ST_Track3[i] = 0;
+      this->Store_Run_NT_Track3[i] = 0;
+      this->Store_Run_ST_Track3[i] = 0;
     }
     //================================================
     this->rec_3_ok = true;
@@ -2187,20 +2590,20 @@ void MidiApplication::StartRecTrack4()
     this->rec_2_ok = false;
     this->rec_3_ok = false;
     this->start_rec_Trk5 = false;
-    //int i = 0;
+
     //=============reset arrays track 3=========================
     for (int i = 0; i < MAX_NB_MIDI_MESSAGES; i++)
     {
       this->command4s[i] = 0;
       this->time4s[i] = 0;
-      this->data24s[i] = 0;
+      // this->data24s[i] = 0;
       //this->data34s[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
     for (int i = 0; i < 100; i++)
     {
-      this->Store_Vel_Run_NT_Track4[i] = 0;
-      this->Store_Vel_Run_ST_Track4[i] = 0;
+      this->Store_Run_NT_Track4[i] = 0;
+      this->Store_Run_ST_Track4[i] = 0;
     }
     //================================================
     this->rec_4_ok = true;
@@ -2213,11 +2616,19 @@ void MidiApplication::StartRecTrack4()
 void MidiApplication::StartStopPlayTrk2()
 {
   //================ startplay2 =============================
-  if (this->Control_Button[28] == 28 && this->Control_Button[13] == 0 )//&& !this->switch_on_off_trk2) //if (this->data2 == 16 && this->data_trk_2) // ************* Play track 2 *************
+  if (this->Control_Button[28] == 28 && this->Control_Button[13] == 0) //&& !this->switch_on_off_trk2) //if (this->data2 == 16 && this->data_trk_2) // ************* Play track 2 *************
   {
     this->start_rec_2 = false;
-     this->Control_Button[28] = 1;
-
+    this->Control_Button[28] = 1;
+    this->x_count = this->tempotrk2;
+    //===============setinstrument=========================
+    if (this->command2s[1])
+    {
+      this->inst2 = this->command2s[1] >> 24 & 0x00000000FF;
+      this->command = 193;
+      this->inst = this->inst2;
+      this->sendProgramChange();
+    }
     if (!this->switch_on_off_trk2)
     {
 
@@ -2258,6 +2669,14 @@ void MidiApplication::StartStopPlayTrk3()
     this->Control_Button[29] = 1;
     this->start_rec_3 = false;
     //this->getDisplayer()->display(this->switch_on_off_trk3);
+    //===============setinstrument=========================
+    if (this->command3s[1])
+    {
+      this->inst3 = this->command3s[1] >> 24 & 0x00000000FF;
+      this->command = 194;
+      this->inst = this->inst3;
+      this->sendProgramChange();
+    }
     if (!this->switch_on_off_trk3)
     {
       if (!this->play_loop)
@@ -2299,6 +2718,14 @@ void MidiApplication::StartStopPlayTrk4()
 
     this->Control_Button[30] = 1;
     //this->getDisplayer()->display("this->Control_Button[28] == 28 ;(data3>0)");
+    //===============setinstrument=========================
+    if (this->command4s[1])
+    {
+      this->inst4 = this->command4s[1] >> 24 & 0x00000000FF;
+      this->command = 195;
+      this->inst = this->inst4;
+      this->sendProgramChange();
+    }
     if (!this->switch_on_off_trk4)
     {
       if (!this->play_loop)
@@ -2326,23 +2753,23 @@ void MidiApplication::StartStopPlayTrk4()
     //this->getDisplayer()->display("this->Control_Button[28] == 0");
     //if (this->switch_on_off_trk4)
     //{
-      if (!this->play_loop)
-      {
-        this->data3 = 0;
-        this->play_4_ok = false;
-        this->flag_play_4 = false;
-        this->Flag_Send_trk4 = false;
-        this->switch_on_off_trk4 = false;
-      }
-      else
-      {
+    if (!this->play_loop)
+    {
+      this->data3 = 0;
+      this->play_4_ok = false;
+      this->flag_play_4 = false;
+      this->Flag_Send_trk4 = false;
+      this->switch_on_off_trk4 = false;
+    }
+    else
+    {
 
-        this->switch_on_off_trk4 = false;
+      this->switch_on_off_trk4 = false;
 
-        this->Flag_Send_trk4 = false;
-      }
-      this->TurnoffNtonLoopTrack4();
-   // }
+      this->Flag_Send_trk4 = false;
+    }
+    this->TurnoffNtonLoopTrack4();
+    // }
   }
 }
 
@@ -2387,37 +2814,52 @@ void MidiApplication::StartStopPlayTrk5()
     this->SwitchOutTrk2 = false;
     this->SwitchinTrk5_2 = false;
     this->Control_Button[31] = 1;
-   // if (this->switch_on_off_Trk5)
+    // if (this->switch_on_off_Trk5)
     //{
-      if (!this->play_loop)
-      {
-        this->data3 = 0;
-        this->play_Trk5 = false;
-        this->flag_Play_Trk5 = false;
-        this->Flag_Send_Trk5 = false;
-        this->switch_on_off_Trk5 = false;
-        this->play_loop_Trk5 = false;
-        this->TurnoffNtonLoopTrk5();
-      }
-      else
-      {
-        this->switch_on_off_Trk5 = false;
-
-        this->Flag_Send_Trk5 = false;
-      }
+    if (!this->play_loop)
+    {
+      this->data3 = 0;
+      this->play_Trk5 = false;
+      this->flag_Play_Trk5 = false;
+      this->Flag_Send_Trk5 = false;
+      this->switch_on_off_Trk5 = false;
+      this->play_loop_Trk5 = false;
       this->TurnoffNtonLoopTrk5();
-   // }
+    }
+    else
+    {
+      this->switch_on_off_Trk5 = false;
+
+      this->Flag_Send_Trk5 = false;
+    }
+    this->TurnoffNtonLoopTrk5();
+    // }
     this->Turnoffallchannels();
   }
 }
+//==============================================================================================
+void MidiApplication::OnOffArranger()
+{
+  //====================== arranger on/off ==============================
+  if (this->Control_Button[32] == 32)
+  {
+    this->SwitchArranger = true;
+  }
+  //==================== stopplay5 =============================
+  else if (this->Control_Button[32] == 0)
+  {
+    this->SwitchArranger = false;
+  }
+}
+
+//===========================================================================
 //========================play5==============================================
 
 void MidiApplication::playTrk5()
 {
 
   if (this->data_Trk5)
-    {
-     //this->x_count = this->tempotrk5; 
+  {
     if (this->TicksTrk5 >= this->timeTrk5[this->midiCodeIndex_Trk5])
     {
       if ((this->commandTrk5[this->midiCodeIndex_Trk5] == 99) ||
@@ -2436,10 +2878,21 @@ void MidiApplication::playTrk5()
 
       if (this->Flag_Send_Trk5 && this->data_Trk5)
       {
-        this->sendMidiMessage(this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF,//command
-                             this->commandTrk5[this->midiCodeIndex_Trk5] >>8 & 0x000000FF,//data2
-                             this->commandTrk5[this->midiCodeIndex_Trk5] & 0x000000FF);//data3
-        this->StoreRuningNoteTrk5(); //store runing note/delete note "off"
+        //this->getDisplayer()->display(this->command1s[1]>>17 & 0x000000FF);//command;
+        this->sendMidiMessage(this->commandTrk5[this->midiCodeIndex_Trk5] >> 16 & 0x000000FF, //command
+                              this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF,  //data2
+                              this->commandTrk5[this->midiCodeIndex_Trk5] & 0x000000FF);      //data3
+
+        this->StoreRuningNoteTrk5();
+        if (this->commandTrk5[this->midiCodeIndex_Trk5 + 1] == 0)
+        {
+
+          this->play_Trk5 = false;
+        }
+
+        // this->sendMidiMessageMg(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF,//command
+        //                        this->command1s[this->midiCodeIndex_1] >>8 & 0x000000FF,//data2
+        //                        this->command1s[this->midiCodeIndex_1] & 0x000000FF);//data3
 
         this->midiCodeIndex_Trk5 += 1;
       }
@@ -2524,14 +2977,14 @@ void MidiApplication::StartRecTrack5()
     {
       this->commandTrk5[i] = 0;
       this->timeTrk5[i] = 0;
-     // this->data2Trk5[i] = 0;
+      //this->data2Trk5[i] = 0;
       //this->data3Trk5[i] = 0;
     }
     //=========init array "delete nt off track 2"==================
     for (int i = 0; i < 100; i++)
     {
-      this->Store_Vel_Run_NT_Trk5[i] = 0;
-      this->Store_Vel_Run_ST_Trk5[i] = 0;
+      this->Store_Run_NT_Trk5[i] = 0;
+      this->Store_Run_ST_Trk5[i] = 0;
     }
     //================================================
     this->rec_Trk5_ok = true;
@@ -2545,20 +2998,19 @@ void MidiApplication::StartRecTrack5()
 
 void MidiApplication::StoreRuningNoteTrk5()
 {
-  if (!this->isNoteOffCommand(this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF))//if status "note on"
-  {                                                                    //=data2
-    this->Store_Vel_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] =
-        this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF;//store note "on" in index note "on"
+  if (!this->isNoteOffCommand(this->commandTrk5[this->midiCodeIndex_Trk5] >> 16 & 0x000000FF)) //if status "note on"
+  {                                                                                            //=data2
+    this->Store_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF] =
+        this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF; //store note "on" in index note "on"
 
-    this->Store_Vel_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = this->commandTrk5[this->midiCodeIndex_Trk5]>>16 & 0x000000FF - 16; //-16 = turn in "note off"
-   // this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>16 & 0x000000FF - 16);
-    //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1]>>8 & 0x000000FF);
-  }         //store status in index note "on"
-  
+    this->Store_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF] = this->commandTrk5[this->midiCodeIndex_Trk5] >> 16 & 0x000000FF - 16; //-16 = turn stat in "note off"
+
+  } //store status in index note "on"
+
   else
   {
-    this->Store_Vel_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = 0;//index note "on" = 0
-    this->Store_Vel_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5]>>8 & 0x000000FF] = 0;//index stat =0
+    this->Store_Run_NT_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF] = 0; //index note "on" = 0
+    this->Store_Run_ST_Trk5[this->commandTrk5[this->midiCodeIndex_Trk5] >> 8 & 0x000000FF] = 0; //index stat =0
   }
 }
 //=================== turn off the runing  note and loop ===============================================
@@ -2567,9 +3019,9 @@ void MidiApplication::TurnoffNtonLoopTrk5()
   int indexDel = 0;
   for (indexDel = 0; indexDel < 100; indexDel++)
   {
-    if (this->Store_Vel_Run_NT_Trk5[indexDel] > 0)
+    if (this->Store_Run_NT_Trk5[indexDel] > 0)
     {
-      this->sendMidiMessage(this->Store_Vel_Run_ST_Trk5[indexDel], this->Store_Vel_Run_NT_Trk5[indexDel], 1);
+      this->sendMidiMessage(this->Store_Run_ST_Trk5[indexDel], this->Store_Run_NT_Trk5[indexDel], 1);
     }
   }
 }
@@ -2620,7 +3072,7 @@ void MidiApplication::switchOffAllTracksRec()
 //===========================================================
 void MidiApplication::Metronome()
 {
-  if (this->beat1 >= 24. && this->Switchbeat1)
+  if (this->beat1 >= 48. && this->Switchbeat1)
   {
     this->sendMidiMessage(153, 68, 100);
     for (int i = 0; i < 5; i++)
@@ -2631,7 +3083,7 @@ void MidiApplication::Metronome()
     //this->beat1= 1.;
     //==================================
   }
-  if (this->beat1 >= 48. && this->Switchbeat2)
+  if (this->beat1 >= 96. && this->Switchbeat2)
   {
     this->sendMidiMessage(153, 75, 90);
     for (int i = 0; i < 5; i++)
@@ -2642,7 +3094,7 @@ void MidiApplication::Metronome()
 
     //this->beat2= 1.;
   } //================================
-  if (this->beat1 >= 72. && this->Switchbeat3)
+  if (this->beat1 >= 144. && this->Switchbeat3)
   {
     this->sendMidiMessage(153, 75, 90);
     for (int i = 0; i < 5; i++)
@@ -2653,7 +3105,7 @@ void MidiApplication::Metronome()
 
     //this->beat2= 1.;
   } //================================
-  if (this->beat1 >= 96. && this->Switchbeat4)
+  if (this->beat1 >= 192. && this->Switchbeat4)
   {
     this->sendMidiMessage(153, 75, 90);
     for (int i = 0; i < 5; i++)
@@ -2708,101 +3160,97 @@ void MidiApplication::StoreDataTrk1()
 {
   //this->getDisplayer()->display(this->inst1);
   //***********************store data mid****************************************
-  
-  this->time1s[this->midiCodeIndex_1] = this->Ticks;//delta time "ticks"
- if(this->midiCodeIndex_1== 1)
- {
-  
- this->tempotrk1=this->x_count;   
- this->command1s[1] = this->inst1<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
- this->command1s[this->midiCodeIndex_1 + 1] = 0;
- }
- else
+  this->time1s[this->midiCodeIndex_1] = this->Ticks; //delta time "ticks"
+  if (this->midiCodeIndex_1 == 1)
   {
-  this->command1s[this->midiCodeIndex_1] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
-  this->command1s[this->midiCodeIndex_1 + 1] = 0;                   //put 0 in index array + 1
- }
-  
-  this->midiCodeIndex_1 += 1;                                       //incr index
-                                                                    
+    this->tempotrk1 = this->x_count;
+    this->command1s[1] = this->inst1 << 24 | this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command1s[this->midiCodeIndex_1 + 1] = 0;
+  }
+  else
+  {
+    this->command1s[this->midiCodeIndex_1] = this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command1s[this->midiCodeIndex_1 + 1] = 0;                                                //put 0 in index array + 1
+  }
+
+  this->midiCodeIndex_1 += 1; //incr index
+                              //this->getDisplayer()->display(this->Ticks);
 }
 
 //======================================================
 void MidiApplication::StoreDataTrk2()
 {
 
-  this->time2s[this->midiCodeIndex_2] = this->Ticks;//delta time "ticks"
- if(this->midiCodeIndex_2== 1)
- {
-  
- this->tempotrk2=this->x_count;   
- this->command2s[1] = this->inst2<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
- this->command2s[this->midiCodeIndex_2 + 1] = 0;
- }
- else
+  //this->getDisplayer()->display("rec2");
+  this->time2s[this->midiCodeIndex_2] = this->Ticks;
+  if (this->midiCodeIndex_2 == 1)
   {
-  this->command2s[this->midiCodeIndex_2] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
-  this->command2s[this->midiCodeIndex_2 + 1] = 0;                   //put 0 in index array + 1
- }
-  
-  this->midiCodeIndex_2 += 1;           
+    this->tempotrk2 = this->x_count;
+    this->command2s[1] = this->inst2 << 24 | this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command2s[this->midiCodeIndex_2 + 1] = 0;
+  }
+  else
+  {
+    this->command2s[this->midiCodeIndex_2] = this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command2s[this->midiCodeIndex_2 + 1] = 0;                                                //put 0 in index array + 1
+  }
+  this->midiCodeIndex_2 += 1;
 }
 
 //====================================================
 void MidiApplication::StoreDataTrk3()
 {
-  this->time3s[this->midiCodeIndex_3] = this->Ticks;//delta time "ticks"
- if(this->midiCodeIndex_3== 1)
- {
-  
- this->tempotrk3=this->x_count;   
- this->command3s[1] = this->inst2<<24 | this->command<<16 | this->data2<<8 | this->data3;  //stat mid
- this->command3s[this->midiCodeIndex_3 + 1] = 0;
- }
- else
+  //this->getDisplayer()->display("rec33");
+  this->time3s[this->midiCodeIndex_3] = this->Ticks;
+  if (this->midiCodeIndex_3 == 1)
   {
-  this->command3s[this->midiCodeIndex_3] = this->command<<16 | this->data2<<8 | this->data3;  //stat mid
-  this->command3s[this->midiCodeIndex_3 + 1] = 0;                   //put 0 in index array + 1
- }
-  
-  this->midiCodeIndex_3 += 1;           
+    this->tempotrk3 = this->x_count;
+    this->command3s[1] = this->inst3 << 24 | this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command3s[this->midiCodeIndex_3 + 1] = 0;
+  }
+  else
+  {
+    this->command3s[this->midiCodeIndex_3] = this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command3s[this->midiCodeIndex_3 + 1] = 0;                                                //put 0 in index array + 1
+  }
+  this->midiCodeIndex_3 += 1;
 }
-  
-
 
 //======================== store data Trk4 =============
 void MidiApplication::StoreDataTrk4()
 {
 
-  //this->getDisplayer()->display("rec3");
+  //this->getDisplayer()->display("rec33");
   this->time4s[this->midiCodeIndex_4] = this->Ticks;
-  this->command4s[this->midiCodeIndex_4] = this->command;
-  this->command4s[this->midiCodeIndex_4 + 1] = 0; //put 0 in index array + 1
-  this->data24s[this->midiCodeIndex_4] = this->data2<<8 | this->data3;//this->octav; //this->data22s[this->midiCodeIndex_2] = this->data2;
-  this->data24s[this->midiCodeIndex_4 + 1] = 0;
-  //this->data34s[this->midiCodeIndex_4] = this->data3;
-  //this->data34s[this->midiCodeIndex_4 + 1] = 0;
+  if (this->midiCodeIndex_4 == 1)
+  {
+    this->tempotrk4 = this->x_count;
+    this->command4s[1] = this->inst4 << 24 | this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command4s[this->midiCodeIndex_4 + 1] = 0;
+  }
+  else
+  {
+    this->command4s[this->midiCodeIndex_4] = this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->command4s[this->midiCodeIndex_4 + 1] = 0;                                                //put 0 in index array + 1
+  }
   this->midiCodeIndex_4 += 1;
 }
 //======================== store data trk5 direct from keyboard =============
 void MidiApplication::StoreDataTrk5()
 {
 
-  //this->getDisplayer()->display("rec3");
-  if(this->midiCodeIndex_Trk5 == 1)
+  //this->getDisplayer()->display("rec33");
+  this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
+  if (this->midiCodeIndex_Trk5 == 1)
   {
-   this->tempotrk5=this->x_count;
-   this->timeTrk5[this->midiCodeIndex_Trk5] = TicksTrk5; 
-  this->commandTrk5[this->midiCodeIndex_Trk5] = this->command<<16 | this->data2<<8 | this->data3;
-  this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
-
+    this->tempotrk5 = this->x_count;
+    this->commandTrk5[1] = this->inst5 << 24 | this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;
   }
-  else {
-  
-  this->timeTrk5[this->midiCodeIndex_Trk5] = TicksTrk5; 
-  this->commandTrk5[this->midiCodeIndex_Trk5] = this->command<<16 | this->data2<<8 | this->data3;
-  this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0; //put 0 in index array + 1
-  
+  else
+  {
+    this->commandTrk5[this->midiCodeIndex_Trk5] = this->command << 16 | this->data2 << 8 | this->data3; //stat mid
+    this->commandTrk5[this->midiCodeIndex_Trk5 + 1] = 0;                                                //put 0 in index array + 1
   }
   this->midiCodeIndex_Trk5 += 1;
 }
@@ -2881,10 +3329,10 @@ void MidiApplication::startloopRectrk5()
     this->Flag_Send_Trk5 = true;
 
     this->timeTrk5[this->midiCodeIndex_Trk5] = this->TicksTrk5;
-    this->commandTrk5[this->midiCodeIndex_Trk5] = 99;
-    this->start_rec_Trk5 = false; //locking this
-    this->play_Trk5 = true;       //switch play track 1
-    this->midiCodeIndex_Trk5 = 0; //index array reset
+    this->commandTrk5[this->midiCodeIndex_Trk5] = 99; // & 0x000000FF;
+    this->start_rec_Trk5 = false;                     //locking this
+    this->play_Trk5 = true;                           //switch play track 1
+    this->midiCodeIndex_Trk5 = 0;                     //index array reset
     //this->TicksTrk5 = 0;          //ticks reset
 
     return;
@@ -2893,20 +3341,21 @@ void MidiApplication::startloopRectrk5()
 //========================== startlooprectrack1 ==========================
 void MidiApplication::startloopRectrk1()
 {
-  if ((this->data2 == 37 && this->data3 > 0 && this->start_rec_1) ||
+  if (((this->data2 == 37 || this->TickPlay) && this->data3 > 0 && this->start_rec_1) ||
       (this->midiCodeIndex_1 + 3 > MAX_NB_MIDI_MESSAGES)) //start loop on nt 37
   {
+    this->TickPlay = false;
     this->switch_on_off_trk3 = false;
     this->switch_on_off_trk2 = false;
     this->data_trk_1 = true;
     this->time1s[this->midiCodeIndex_1] = this->Ticks;
-    this->command1s[this->midiCodeIndex_1] = LOOP_TRACK;// & 0x000000FF;
-    this->start_rec_1 = false; //locking this
-    this->play_1_ok = true;    //switch play track 1
+    this->command1s[this->midiCodeIndex_1] = LOOP_TRACK; // & 0x000000FF;
+    this->start_rec_1 = false;                           //locking this
+    this->play_1_ok = true;                              //switch play track 1
     //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF);
     this->midiCodeIndex_1 = 0; //index array reset
     this->Ticks = 0.;          //ticks reset
-    
+
     return;
   }
 }
@@ -2916,22 +3365,25 @@ void MidiApplication::startloopRectrk2()
 {
   if (!this->play_loop)
   {
+
     if ((this->data2 == 37 && this->data3 > 0 && this->start_rec_2) ||
         (this->midiCodeIndex_2 + 3 > MAX_NB_MIDI_MESSAGES)) //start loop on nt 37
     {
+      //this->getDisplayer()->display("looprec2");
 
-      this->flag_play_2 = true;
-      this->Flag_Send_trk2 = true;
+      //this->switch_on_off_trk3 = false;
+      //this->switch_on_off_trk2 = false;
       this->data_trk_2 = true;
-      //this->getDisplayer()->display(this->Ticks);
       this->time2s[this->midiCodeIndex_2] = this->Ticks;
-      this->command2s[this->midiCodeIndex_2] = LOOP_TRACK;// & 0x000000FF;
-
-      this->start_rec_2 = false; //locking this
-      this->play_2_ok = true;    //switch play track 1
+      this->command2s[this->midiCodeIndex_2] = LOOP_TRACK; // & 0x000000FF;
+      this->start_rec_2 = false;                           //locking this
+      this->play_2_ok = true;                              //switch play track 1
+      //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF);
       this->midiCodeIndex_2 = 0; //index array reset
       this->Ticks = 0.;          //ticks reset
-
+      //this->play_2();
+      this->flag_play_2 = true;
+      this->Flag_Send_trk2 = true;
       return;
     }
   }
@@ -2943,22 +3395,25 @@ void MidiApplication::startloopRectrk3()
 {
   if (!this->play_loop)
   {
+
     if ((this->data2 == 37 && this->data3 > 0 && this->start_rec_3) ||
         (this->midiCodeIndex_3 + 3 > MAX_NB_MIDI_MESSAGES)) //start loop on nt 37
     {
+      //this->getDisplayer()->display("looprec2");
 
+      //this->switch_on_off_trk3 = false;
+      //this->switch_on_off_trk2 = false;
       this->data_trk_3 = true;
-
-      this->flag_play_3 = true;
-      this->Flag_Send_trk3 = true;
-      //this->getDisplayer()->display("rec2");
       this->time3s[this->midiCodeIndex_3] = this->Ticks;
-      this->command3s[this->midiCodeIndex_3] = LOOP_TRACK;// & 0x000000FF;
-      this->start_rec_3 = false; //locking this
-      this->play_3_ok = true;    //switch play track 1
+      this->command3s[this->midiCodeIndex_3] = LOOP_TRACK; // & 0x000000FF;
+      this->start_rec_3 = false;                           //locking this
+      this->play_3_ok = true;                              //switch play track 1
+      //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF);
       this->midiCodeIndex_3 = 0; //index array reset
       this->Ticks = 0.;          //ticks reset
-
+      //this->play_2();
+      this->flag_play_3 = true;
+      this->Flag_Send_trk3 = true;
       return;
     }
   }
@@ -2973,56 +3428,841 @@ void MidiApplication::startloopRectrk4()
         (this->midiCodeIndex_4 + 3 > MAX_NB_MIDI_MESSAGES)) //start loop on nt 37
     {
       this->data_trk_4 = true;
-      this->flag_play_4 = true;
-      this->Flag_Send_trk4 = true;
-      //this->getDisplayer()->display("rec2");
       this->time4s[this->midiCodeIndex_4] = this->Ticks;
-      this->data24s[this->midiCodeIndex_4] = 98;
-      this->start_rec_4 = false; //locking this
-      this->play_4_ok = true;    //switch play track 1
+      this->command4s[this->midiCodeIndex_4] = LOOP_TRACK; // & 0x000000FF;
+      this->start_rec_4 = false;                           //locking this
+      this->play_4_ok = true;                              //switch play track 1
+      //this->getDisplayer()->display(this->command1s[this->midiCodeIndex_1] >> 8 & 0x000000FF);
       this->midiCodeIndex_4 = 0; //index array reset
       this->Ticks = 0.;          //ticks reset
-
+      //this->play_2();
+      this->flag_play_4 = true;
+      this->Flag_Send_trk4 = true;
       return;
     }
   }
 }
-//=========================align notes ascending order============================================================================
+//=======================================================================
+/*#define TAB_SIZE 50
+#define UNDEFINED_VALUE -1
+        
 
 
-void MidiApplication::AlignNotes(int i, int j, int tab[], int tmp[]) {
-    if(j <= i){ return;}
-  
-    int m = (i + j) / 2;
-    
-    AlignNotes(i, m, tab, tmp);     //trier la moitié gauche récursivement
-    AlignNotes(m + 1, j, tab, tmp); //trier la moitié droite récursivement
-
-    int pg = i;     //pg pointe au début du sous-tableau de gauche
-    int pd = m + 1; //pd pointe au début du sous-tableau de droite
-    int c;          //compteur
-
-// on boucle de i à j pour remplir chaque élément du tableau final fusionné
-    for(c = i; c <= j; c++) {
-        if(pg == m + 1) { //le pointeur du sous-tableau de gauche a atteint la limite
-            tmp[c] = tab[pd];
-            pd++;
-        }else if (pd == j + 1) { //le pointeur du sous-tableau de droite a atteint la limite
-            tmp[c] = tab[pg];
-            pg++;
-        }else if (tab[pg] < tab[pd]) { //le pointeur du sous-tableau de gauche pointe vers un élément plus petit
-            tmp[c] = tab[pg];
-            pg++;
-        }else {  //le pointeur du sous-tableau de droite pointe vers un élément plus petit
-            tmp[c] = tab[pd];
-            pd++;
+//==========================================================================
+char tabCharData[TAB_SIZE];
+        
+        for(unsigned int index=0; index<TAB_SIZE; index++) {
+            tabCharData[index] = UNDEFINED_VALUE;
         }
+        tabCharData[0]=120;
+        tabCharData[1]=98;
+        tabCharData[2]=2;
+        tabCharData[3]=126;
+        
+        char outputTabCharData[3*TAB_SIZE+1];
+        
+        concatTabCharData( &tabCharData[0], &outputTabCharData[0], TAB_SIZE, UNDEFINED_VALUE );
+        // concatTabCharData( &tabCharData[2], &outputTabCharData[0], TAB_SIZE, UNDEFINED_VALUE );
+        
+        printf("\n\n");
+        printf(outputTabCharData);
+        
+        return 0;
     }
 
-    for(c = i; c <= j; c++) {  //copier les éléments de tmp[] à tab[]
-        tab[c] = tmp[c];
+
+//=========================================================================
+    void concatTabCharData(char* inputTabCharData, char* outputTabCharData, unsigned int tabZize, int undefinedValue) {
+        
+        int stringLength = 0;
+        for(unsigned int index=0; index<tabZize; index++) {
+            char inputCharData = *(inputTabCharData+index);
+            if (inputCharData!=undefinedValue) {
+                // printf("%d\n", inputCharData);
+            
+                stringLength += sprintf(outputTabCharData +stringLength, "%d", inputCharData);
+            
+            
+            } else break;
+        }
+    }*/
+
+//==============================================================================================
+
+//=========================================notes converter=====
+
+//=======================================================================================
+void MidiApplication::DecodChordType()
+{
+
+  if (this->amountnoteschord >= 2)
+  {
+    //this->transp = this->FirstLeftNote - 1;
+    this->Note1Chd = this->FirstLeftNote;
+    this->Note2Chd = (this->ChordCod >> 24 & 0x000000FF);
+    this->Note3Chd = (this->ChordCod >> 16 & 0x000000FF);
+    this->Note4Chd = (this->ChordCod >> 8 & 0x000000FF);
+    this->Note5Chd = (this->ChordCod & 0x000000FF);
+
+    //========================major type four notes================================
+    if (this->Note4Chd - this->Note3Chd == 5 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+
+      this->ChordType = 13;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
     }
+    //==========================invert bass 3 ===============================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 13;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //================================invert bass 5 ====================================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 13;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 1;
+      // this->getDisplayer()->display(this->ChordTranspose);
+    }
+    //====================================================================================
+
+    //========================major type three notes================================
+    if (this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 13;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //============================invert bass  5 ================================================
+    if (this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 13;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //==========================invert bass 3 =========================================================
+    if (this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 13;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //====================================================================================
+    //========================minor type four notes================================
+
+    if (this->Note4Chd - this->Note3Chd == 5 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 24;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 24;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 24;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //====================================================================================
+    //========================minor type three notes================================
+    if (this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 23;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=================================invert bass 5 =========================================
+    if (this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 23;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //===============================invert bass 3 =====================================================
+    if (this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 23;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===========================================================================================
+    //========================7th three notes================================
+    if (this->Note3Chd - this->Note2Chd == 6 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=================================invert bass 5 =========================================
+    if (this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===============================invert bass 7min =====================================================
+    if (this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //===========================================================================================
+    //===============================invert bass 3 =====================================================
+    if (this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 6)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //======================== 7th four notes ================================
+
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      //this->getDisplayer()->display("kokoko");
+      this->ChordType = 34;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      this->ChordType = 34;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 1;
+    }
+    //====================================================================================
+    //======================== 7th Maj four notes ================================
+
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 44;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 1 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 1 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //====================================================================================
+    if (this->Note4Chd - this->Note3Chd == 1 && this->Note3Chd - this->Note2Chd == 7 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note3Chd - 1;
+    }
+    //========================7th Maj three notes================================
+    if (this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 1)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //=================================invert bass 5 =========================================
+    if (this->Note3Chd - this->Note2Chd == 1 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===============================invert bass 7min =====================================================
+    if (this->Note3Chd - this->Note2Chd == 1 && this->Note2Chd - this->Note1Chd == 7)
+    {
+      this->ChordType = 44;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //===========================================================================================
+    //======================== 9th  ================================
+
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 74;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 5 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      this->ChordType = 74;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 74;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //====================================================================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 74;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 1;
+    }
+    //================================================================================
+    if (this->Note4Chd - this->Note3Chd == 5 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 74;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 1;
+    }
+    //======================== 6th four notes (min 7th) ================================
+
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 54;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 54;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      this->ChordType = 54;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //====================================================================================
+    //======================== min 7th ================================
+
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 64;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================invert bass 3 =========================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 64;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 64;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //====================================================================================
+    //======================== dim ================================
+
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 84;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=============================7 dim =========================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 94;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //===============================invert bass 5 =================================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      this->ChordType = 94;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //====================================================================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      this->ChordType = 94;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //============================ min6 =================================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 3)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 12;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //==================================================================================
+    if (this->Note4Chd - this->Note3Chd == 3 && this->Note3Chd - this->Note2Chd == 3 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 12;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //============================================ sus4 =======================================
+    if (this->Note4Chd - this->Note3Chd == 2 && this->Note3Chd - this->Note2Chd == 1 && this->Note2Chd - this->Note1Chd == 4)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 11;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+    //=====================================================================================
+    if (this->Note4Chd - this->Note3Chd == 5 && this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 1)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 11;
+      this->ChordName = this->Note4Chd;
+      this->ChordTranspose = this->Note4Chd - 13;
+    }
+    //=======================================================================================
+    if (this->Note4Chd - this->Note3Chd == 4 && this->Note3Chd - this->Note2Chd == 5 && this->Note2Chd - this->Note1Chd == 2)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 11;
+      this->ChordName = this->Note3Chd;
+      this->ChordTranspose = this->Note3Chd - 13;
+    }
+    //=======================================================================
+    if (this->Note4Chd - this->Note3Chd == 1 && this->Note3Chd - this->Note2Chd == 4 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      // this->getDisplayer()->display("kokoko");
+      this->ChordType = 11;
+      this->ChordName = this->Note2Chd;
+      this->ChordTranspose = this->Note2Chd - 13;
+    }
+    //============================================== 3 notes ==============================
+    if (this->Note3Chd - this->Note2Chd == 2 && this->Note2Chd - this->Note1Chd == 5)
+    {
+      this->ChordType = 11;
+      this->ChordName = this->Note1Chd;
+      this->ChordTranspose = this->Note1Chd - 1;
+    }
+
+    //====================================================================================
+    //this->getDisplayer()->display(this->ChordType);
+    //this->getDisplayer()->display(this->transp);
+  }
 }
-//==============================================================================
+//==================================================transpos chord data2======================================
 
+//============================change note chord=================================
+void MidiApplication::ChangePlayNoteChord1()
+{
+  // if (this->delay1 == 0)
+  // {
 
+  this->transpT1 = this->ChordTranspose;
+  //this->getDisplayer()->display(this->transp);
+
+  for (unsigned char a = 36; a < 96; a++)
+  {
+    if (this->Store_Run_NT_Track1[a] > 0)
+    {
+
+      if (this->TabConvertData2[this->ChordType][a] != this->Store_Run_NT_Track1[a])
+      {
+        if ((this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a]) != (this->TabConvertData2[this->ChordType][a] + this->transpT1))
+        {
+
+          //this->sendMidiMessage(176,126,0);
+          // this->sendMidiMessage(176,65,127);//portamento "on"
+          this->sendMidiMessage(176, 5, 25); //portamento speed
+
+          //  for(int d=0;d<5;d++)
+          //  {
+          //  }
+          this->sendMidiMessage(176, 84);
+          this->midiStream->write(144);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transpT1);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track1[a]);
+
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(144);
+          this->midiStream->write(this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          this->NoteTransposeTrk1[a] = this->transpT1;
+          this->Store_Run_NT_Track1[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(176, 65, 0); //portamento "off"
+        }
+      }
+
+      else if (this->transpT1 != this->NoteTransposeTrk1[a])
+      {
+        if ((this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a]) != (this->TabConvertData2[this->ChordType][a] + this->transpT1))
+        {
+          // this->sendMidiMessage(176,126,0);//mono "off"
+          // this->sendMidiMessage(176,65,127);//portamento "on"
+          this->sendMidiMessage(176, 5, 25); //portamnto speed
+
+          // this->sendMidiMessage(176,84);
+          this->midiStream->write(144);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transpT1);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track1[a]);
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(144);
+          this->midiStream->write(this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          this->NoteTransposeTrk1[a] = this->transpT1;
+          this->Store_Run_NT_Track1[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(176, 65, 0); //portamento "off"
+        }
+      }
+    }
+  }
+
+  // }
+}
+//=================================================================================================
+//================================================================================================
+void MidiApplication::ChangePlayNoteChord2()
+{
+  // if (this->delay2 == 0)
+  // {
+  //this->transp = this->FirstLeftNote - 1;
+  this->transp = this->ChordTranspose;
+
+  for (unsigned char a = 36; a < 96; a++)
+  {
+    if (this->Store_Run_NT_Track2[a] > 0)
+    {
+
+      if (this->TabConvertData2[this->ChordType][a] != this->Store_Run_NT_Track2[a])
+      {
+        if ((this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a]) != (this->TabConvertData2[this->ChordType][a] + this->transp))
+        {
+          //this->sendMidiMessage(177,127,0);//poly
+          //this->sendMidiMessage(177,126,0);//mono
+          this->sendMidiMessage(177, 65, 127); //portamento "on"
+          this->sendMidiMessage(177, 5, 10);   //portamento speed
+
+          this->sendMidiMessage(177, 84);
+          this->midiStream->write(145);
+          //this->midiStream->write(this->Store_Run_NT_Track2[a] + this->transp);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transp);
+          this->midiStream->write(this->Store_Run_Vel_Track2[a]);
+
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(145);
+          this->midiStream->write(this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack2[a] = this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a];
+          this->NoteTransposeTrk2[a] = this->transp;
+          this->Store_Run_NT_Track2[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(177, 65, 0); //portamento "off"ordType][a];
+        }
+      }
+
+      else if (this->transp != this->NoteTransposeTrk2[a])
+      {
+        if ((this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a]) != (this->TabConvertData2[this->ChordType][a] + this->transp))
+        {
+          // this->sendMidiMessage(176,126,0);//mono "off"
+          this->sendMidiMessage(177, 65, 127); //portamento "on"
+          this->sendMidiMessage(177, 5, 10);   //portamnto speed
+
+          this->sendMidiMessage(177, 84);
+          this->midiStream->write(145);
+          // this->midiStream->write(this->Store_Run_NT_Track2[a] + this->transp);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transp);
+          this->midiStream->write(this->Store_Run_Vel_Track2[a]);
+
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(145);
+          this->midiStream->write(this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack2[a] = this->Store_Run_NT_Track2[a] + this->NoteTransposeTrk2[a];
+          this->NoteTransposeTrk2[a] = this->transp;
+          this->Store_Run_NT_Track2[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(177, 65, 0); //portamento "off"
+        }
+      }
+    }
+  }
+  // }
+}
+//=================================================================================================
+void MidiApplication::ChangePlayNoteChord3()
+{
+  // if (this->delay3 == 0)
+  // {
+  //this->transp = this->FirstLeftNote - 1;
+  this->transp = this->ChordTranspose;
+
+  for (unsigned char a = 36; a < 96; a++)
+  {
+    if (this->Store_Run_NT_Track3[a] > 0)
+    {
+
+      if (this->TabConvertData2[this->ChordType][a] != this->Store_Run_NT_Track3[a])
+      {
+        if ((this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a]) != (this->TabConvertData2[this->ChordType][a] + this->transp))
+        {
+
+          //this->sendMidiMessage(176,126,0);
+          this->sendMidiMessage(178, 65, 127); //portamento "on"
+          this->sendMidiMessage(178, 5, 10);   //portamento speed
+
+          this->sendMidiMessage(178, 84);
+          this->midiStream->write(146);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transp);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track3[a]);
+
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(146);
+          this->midiStream->write(this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack3[a] = this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a];
+          this->NoteTransposeTrk3[a] = this->transp;
+          this->Store_Run_NT_Track3[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(178, 65, 0); //portamento "off"ordType][a];
+        }
+      }
+
+      else if (this->transp != this->NoteTransposeTrk3[a])
+      {
+        if ((this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a]) != (this->TabConvertData2[this->ChordType][a] + this->transp))
+        {
+          // this->sendMidiMessage(176,126,0);//mono "off"
+          this->sendMidiMessage(178, 65, 127); //portamento "on"
+          this->sendMidiMessage(178, 5, 10);   //portamnto speed
+
+          this->sendMidiMessage(178, 84);
+          this->midiStream->write(146);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transp);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track3[a]);
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(146);
+          this->midiStream->write(this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack3[a] = this->Store_Run_NT_Track3[a] + this->NoteTransposeTrk3[a];
+          this->NoteTransposeTrk3[a] = this->transp;
+          this->Store_Run_NT_Track3[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage(178, 65, 0); //portamento "off"
+        }
+      }
+    }
+  }
+  // }
+}
+//=================================================================================================
+void MidiApplication::ChangePlayNoteChord4()
+{
+  // if (this->delay3 == 0)
+  // {
+  //this->transp = this->FirstLeftNote - 1;
+  this->transpT4 = this->ChordTranspose;
+
+  for (unsigned char a = 36; a < 96; a++)
+  {
+    if (this->Store_Run_NT_Track4[a] > 0)
+    {
+
+      if (this->TabConvertData2[this->ChordType][a] != this->Store_Run_NT_Track4[a])
+      {
+        if ((this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a]) != (this->TabConvertData2[this->ChordType][a] + this->transpT4))
+        {
+
+          //this->sendMidiMessage(176,126,0);
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 65, 127); //portamento "on"
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 5, 10);   //portamento speed
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 84);      //portamento
+
+          this->midiStream->write(this->Store_Run_ST_Track4[a] + 16);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transpT4);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track4[a]);
+
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+          for (int d = 0; d < 5; d++)
+          {
+          }
+
+          this->midiStream->write(this->Store_Run_ST_Track4[a] + 16);
+          this->midiStream->write(this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack4[a] = this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a];
+          this->NoteTransposeTrk4[a] = this->transpT4;
+          this->Store_Run_NT_Track4[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 65, 0); //portamento "off"ordType][a];
+        }
+      }
+
+      else if (this->transpT4 != this->NoteTransposeTrk4[a])
+      {
+        if ((this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a]) != (this->TabConvertData2[this->ChordType][a] + this->transpT4))
+        {
+          // this->sendMidiMessage(176,126,0);//mono "off"
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 65, 127); //portamento "on"
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 5, 10);   //portamento speed
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a] + 48), 84);      //portamento
+
+          this->midiStream->write(this->Store_Run_ST_Track4[a] + 16);
+          this->midiStream->write(this->TabConvertData2[this->ChordType][a] + this->transpT4);
+          //this->midiStream->write(this->Store_Run_NT_Track1[a] + this->transp);//this->NoteTransposeTrk1[a]);
+          this->midiStream->write(this->Store_Run_Vel_Track4[a]);
+          //this->Store_Run_NT_OffTrack1[a] = this->Store_Run_NT_Track1[a] + this->NoteTransposeTrk1[a];
+
+          this->midiStream->write(this->Store_Run_ST_Track4[a] + 16);
+          this->midiStream->write(this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a]);
+          this->midiStream->write(0);
+
+          this->Store_Run_NT_OffTrack4[a] = this->Store_Run_NT_Track4[a] + this->NoteTransposeTrk4[a];
+          this->NoteTransposeTrk4[a] = this->transpT4;
+          this->Store_Run_NT_Track4[a] = this->TabConvertData2[this->ChordType][a];
+
+          //this->sendMidiMessage(176,127,0);
+          this->sendMidiMessage((this->Store_Run_ST_Track4[a]+48),65,0);//portamento "off"
+        }
+      }
+    }
+  }
+  // }
+}
+//=================================================================================================
+
+//========================set fx============
+void MidiApplication::SetFx()
+{
+  if (this->flagsetfx)
+  {
+    this->flagsetfx = false;
+    this->sendMidiMessage(176, 65, 127); //portamento "on"
+    this->sendMidiMessage(176, 5, 15);   //portamnto speed
+                                         //this->sendMidiMessage(177,126,0);
+  }
+  else if (!this->flagsetfx)
+  {
+    this->flagsetfx = true;
+    this->sendMidiMessage(176, 65, 0); //portamento "on"
+    this->sendMidiMessage(176, 5, 15); //portamnto speed
+                                       //this->sendMidiMessage(177,127,0);
+  }
+}
+//=================================replace channel======================================
+// void MidiApplication::ChannelReplace()
+// {
+// if((this->command==145)||(this->command==129))//ch 2
+// this->command=this->command+2;//ch 4
+
+// }
+
+//==================midiclock===========================
+void MidiApplication::MidiClock()
+{
+  this->MidiTicks += 1;
+  this->command = 254;
+  if (this->MidiTicks == 192)
+  {
+    this->MidiTicks = 1;
+    this->TickPlay = true;
+  }
+}
+//========================exclusif system================================
+void MidiApplication::SendExclusifSyst()
+{
+  if (this->CodeExclusifSyst == 1)
+  {
+    //this->midiStream->write(240);//start send code
+    this->CodeExclusifSyst = 0;
+    return;
+  }
+  if (this->CodeExclusifSyst == 2)
+  {
+    //this->midiStream->write(247);//stop send code
+    this->CodeExclusifSyst = 0;
+    return;
+  }
+  //this->midiStream->write(this->data2);//data exclusif
+}
+//========================================================================

@@ -29,6 +29,7 @@
 #define INSTR8_INIT 67
 #define BUTTON_MAX 35
 #define LOOP_TRACK 98
+#define TIME_DELAY_CHORD 10000
 
 class MidiApplication
 {
@@ -37,7 +38,6 @@ public:
 
     MidiApplication(IMidiStream *midiStream);
     ~MidiApplication();
-    void AlignNotes(int i, int j, int tab[], int tmp[]);
     void sendProgramChange();
     void init();
     void initArrays();
@@ -45,6 +45,7 @@ public:
     void initArrays3();
     void initArrays4();
     IMidiStream *getMidiStream();
+    // void ChannelReplace();
 
     void handleMidiCode();
     void setDisplayer(IDisplayer *displayer);
@@ -85,21 +86,23 @@ public:
     void recordTrk5();
     void switchOffAllTracksRec();
     void TurnoffNtonLoopTrack1();
-    void StoreRuningNoteTrk1();
+    void StoreRuningNoteTrk1(int command, int data2, int data3);
+    void StoreRuningNoteTrk2(int command, int data2, int data3);
+    void StoreRuningNoteTrk3(int command, int data2, int data3);
+    void StoreRuningNoteTrk4(int command, int data2, int data3);
     void TurnoffNtonLoopTrack2();
-    void StoreRuningNoteTrk2();
+    //void StoreRuningNoteTrk2();
     void TurnoffNtonLoopTrack3();
-    void StoreRuningNoteTrk3();
-    void StoreRuningNoteTrk4();
+    //void StoreRuningNoteTrk3();
+    //void StoreRuningNoteTrk4();
     void TurnoffNtonLoopTrack4();
     void StoreRuningNoteTrk5();
     void TurnoffNtonLoopTrk5();
-    void StoreRuningNoteTrk6();
-    void TurnoffNtonLoopTrk6();
+    //void StoreRuningNoteTrk6();
+    //void TurnoffNtonLoopTrk6();
     void ControlChange();
     void FlashingLed();
     void ConvertStatNotetoStatControl();
-    bool isNoteOnOrOffCommandChannel1(int command);
 
     void StoreDataTrk5Mg();
     void StoreDataTrk5_2Mg();
@@ -112,13 +115,58 @@ public:
     void StoreDataTrk5();
     void StoreDataTrk6();
 
+    void StoreNoteonChord();
+    void resettabchord();
+   
+    void DecodChordType();
+   
+    void ChangePlayNoteChord1();
+    void ChangePlayNoteChord2();
+    void ChangePlayNoteChord3();
+    void ChangePlayNoteChord4();
+    void OnOffArranger();
+    void SendExclusifSyst();
+    
+    void SetFx();
+
+
     //void Channel1Bank3();
 
     //--- Déclaration des membres public --- (à éviter ! si pas nécessaire mettre en private)
     //bool sd_cardtrk1=false
+    unsigned char ChPlay1=1;
+    unsigned char ChPlay4=1;
+    unsigned char Note1Chd = 36;
+    unsigned char Note2Chd = 40;
+    unsigned char Note3Chd = 43;
+    unsigned char Note4Chd = 0;
+    unsigned char Note5Chd = 0;
+    unsigned char ChordType=14;
+    unsigned char data2chord=36;
+    unsigned char notedata2=36;
+    unsigned char data2chordm=36;
+    unsigned char ChordName=1;
+     
+     unsigned char NoteTabChord1=36;
+     unsigned char NoteTabChord2=36;
+     unsigned char NoteTabChord3=36;
+     unsigned char NoteTabChord4=36;
+     unsigned char NoteInitPlay1_In=36;
+     unsigned char NoteInitPlay2_In=36;
+     unsigned char NoteInitPlay3_In=36;
+     unsigned char NoteInitPlay4_In=36;
+     //unsigned char LastChordType2=13;
+     unsigned char fileNumberStl=96;
+     
+     
+     
+    
+
+    unsigned char ChordX = 1;
+    int VelocCountDecr = 0;
     bool DataMidtoSd = false;
     bool SdtoDataMid = false;
-    bool Bang = false;
+    unsigned int bang = 0;
     bool play_loop = false;
     bool play_loop2 = false;
     bool play_loop3 = false;
@@ -132,6 +180,11 @@ public:
     bool SwitchinTrk5 = false;
     bool SwitchOutTrk2 = false;
     bool SwitchinTrk5_2 = false;
+    bool SwitchReplaceChordNote=false;
+    bool SwitchDelayOffLastNote=false;
+    
+    bool WaitNextChord=true;
+    bool flagsetfx=true;
 
     bool play_1_ok = false;
     bool play_2_ok = false;
@@ -165,6 +218,7 @@ public:
     bool Switchbeat2 = true;
     bool Switchbeat3 = true;
     bool Switchbeat4 = true;
+    bool ChgPlayNt1=false;
 
     bool FirstNoteTrk2 = true;
     bool FirstNoteTrk3 = true;
@@ -184,13 +238,11 @@ public:
     bool rec_4_ok = false;
     bool rec_Trk5_ok = false;
     bool rec_Trk6_ok = false;
+    bool SwitchArranger=false;
+    bool TickPlay=false;
 
     float x_count = 0.1;
-    float tempotrk1 = 0.1;
-    float tempotrk2 = 0.1;
-    float tempotrk3 = 0.1;
-
-    float tempotrk5 = 0.1;
+    //float x_counttampon=0.1;
 
     unsigned short midiCodeIndex_1 = 0;
     unsigned short midiCodeIndex_2 = 0;
@@ -202,6 +254,11 @@ public:
     float TicksTrk5 = 0.; // ticks horloge track merge
     float measure = 0.;
     float beat1 = 1.;
+    unsigned char TabConvertData2[100] [100];
+    //unsigned char StartStopExclusifSyst=0;
+    unsigned char CodeExclusifSyst=0;
+    bool flagExclusifSyst=0;
+    
 
     short int commandx[12];
     float time1s[MAX_NB_TIMES];
@@ -212,60 +269,64 @@ public:
     float time2s[MAX_NB_TIMES];
     int command2s[MAX_NB_MIDI_MESSAGES];
     //int  data32s[MAX_NB_MIDI_MESSAGES];
-    //int data22s[MAX_NB_MIDI_MESSAGES];
+    //int  data22s[MAX_NB_MIDI_MESSAGES];
     int essai = 0;
 
     float time3s[MAX_NB_TIMES];
     int command3s[MAX_NB_MIDI_MESSAGES];
     //int  data33s[MAX_NB_MIDI_MESSAGES];
-    //int data23s[MAX_NB_MIDI_MESSAGES];
+    //int  data23s[MAX_NB_MIDI_MESSAGES];
 
     float time4s[MAX_NB_TIMES];
     int command4s[MAX_NB_MIDI_MESSAGES];
     // int  data34s[MAX_NB_MIDI_MESSAGES];
-    int data24s[MAX_NB_MIDI_MESSAGES];
+    //int  data24s[MAX_NB_MIDI_MESSAGES];
 
     float timeTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
     int commandTrk5[MAX_NB_MIDI_MESSAGES_TRK5];
     // int  data3Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
-    // int  data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
+    //int  data2Trk5[MAX_NB_MIDI_MESSAGES_TRK5];
 
-    // float timeTrk6[MAX_NB_TIMES];
-    // int  commandTrk6[MAX_NB_MIDI_MESSAGES];
-    // int  data3Trk6[MAX_NB_MIDI_MESSAGES];
-    // int  data2Trk6[MAX_NB_MIDI_MESSAGES];
+    int NoteChord[55];
+    unsigned char VelNoteChord[55];
+    unsigned char NoteTransposeTrk1[NT_RUN_MAX];
+    unsigned char NoteTransposeTrk2[NT_RUN_MAX];
+    unsigned char NoteTransposeTrk3[NT_RUN_MAX];
+    unsigned char NoteTransposeTrk4[NT_RUN_MAX];
+    
+    unsigned char ChordTranspose=0;
 
-    // float timeTrkMg[MAX_NB_TIMES];
-    // int  commandTrkMg[MAX_NB_MIDI_MESSAGES];
-    // int  data3TrkMg[MAX_NB_MIDI_MESSAGES];
-    // int  data2TrkMg[MAX_NB_MIDI_MESSAGES];
-
-    int Store_Vel_Run_NT_TrkMg[NT_RUN_MAX];
-    int Store_Vel_Run_ST_TrkMg[NT_RUN_MAX];
+    int Store_Run_NT_TrkMg[NT_RUN_MAX];
+    int Store_Run_ST_TrkMg[NT_RUN_MAX];
+    unsigned char Store_Run_Vel_Track1[NT_RUN_MAX];
+    unsigned char Store_Run_Vel_Track2[NT_RUN_MAX];
+    unsigned char Store_Run_Vel_Track3[NT_RUN_MAX];
+    unsigned char Store_Run_Vel_Track4[NT_RUN_MAX];
     int StatusNoteon[NT_RUN_MAX];
-
-    int Store_Vel_Run_NT_Track1[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track1[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track2[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track2[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track3[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track3[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Track4[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Track4[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Trk5[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Trk5[NT_RUN_MAX];
-    int Store_Vel_Run_ST_Trk6[NT_RUN_MAX];
-    int Store_Vel_Run_NT_Trk6[NT_RUN_MAX];
-    int X_velocitych1[NT_RUN_MAX];
+   
+    unsigned char Store_Run_NT_OffTrack1[NT_RUN_MAX];
+    unsigned char Store_Run_NT_OffTrack2[NT_RUN_MAX];
+    unsigned char Store_Run_NT_OffTrack3[NT_RUN_MAX];
+    unsigned char Store_Run_NT_OffTrack4[NT_RUN_MAX];
+    int Store_Run_NT_Track1[NT_RUN_MAX];
+    int Store_Run_ST_Track1[NT_RUN_MAX];
+    int Store_Run_NT_Track2[NT_RUN_MAX];
+    int Store_Run_ST_Track2[NT_RUN_MAX];
+    int Store_Run_NT_Track3[NT_RUN_MAX];
+    int Store_Run_ST_Track3[NT_RUN_MAX];
+    int Store_Run_NT_Track4[NT_RUN_MAX];
+    int Store_Run_ST_Track4[NT_RUN_MAX];
+    int Store_Run_ST_Trk5[NT_RUN_MAX];
+    int Store_Run_NT_Trk5[NT_RUN_MAX];
+    int Store_Run_ST_Trk6[NT_RUN_MAX];
+    int Store_Run_NT_Trk6[NT_RUN_MAX];
+    //int X_velocitych1[NT_RUN_MAX];
     int Control_Button[BUTTON_MAX];
     int Control_Button_Onlyon[BUTTON_MAX];
-
-    int nbr, tab[100], tmp[100];
     int comm = 144;
 
     void StoreControlData2();
-     bool isNoteOnCommand();
-     bool isNoteOnCommand(int command);
+    void MidiClock();
 
     int inst1 = 0;
     int inst2 = 0;
@@ -286,12 +347,44 @@ public:
     int command = 0;
     int data2 = 60;
     int data3 = 100;
+    bool isNoteOnCommand(int command);
+    float tempotrk1 = x_count;
+    float tempotrk2 = x_count;
+    float tempotrk3 = x_count;
+    float tempotrk4 = x_count;
+    float tempotrk5 = x_count;
+    int amountnoteschord = 0;
+    unsigned int ChordCod = 0;
+    unsigned int ChordNumber = 1;
+    unsigned int ChordNumberTp1= 1;
+    unsigned int ChordNumberTp2 = 1;
+     unsigned int ChordNumberTp3 = 1;
+      unsigned int ChordNumberTp4 = 1;
+    char transp = 0;
+    char transp1 = 0;
+    char transpT1=0;
+    char transpT4=0;
+    int IndexBitDecal = 0;
+    unsigned int FirstLeftNote = 1;
+    unsigned int DelayDecodChord = 20;
+    unsigned int delay1=2000;
+    unsigned int delay2=2000;
+    unsigned int delay3=2000;
+    unsigned int MidiTicks=0;
+    
+    
+
+    int TabNtChord[6];
+    int IndTabNtChord = 0;
+    int IndTabNtChordOff[55];
+    int tab[100];
+    int tmp[100];
 
 private:
     //--- Déclaration des Méthodes private ---
     IDisplayer *getDisplayer();
     int getMidiStreamCurrentMidiCode();
-
+    bool isNoteOnOrOffCommandChannel1(int command);
     void setCommandChannel();
 
     unsigned int SpeedLed13 = 1000000;
@@ -306,8 +399,8 @@ private:
 
     bool isNoteOffCommand();
     bool isNoteOffCommand(int command);
-   
-    
+    bool isNoteOnCommand();
+
     bool isControlChangeCommand();
     bool isControlChangeCommand(int command);
     bool isProgramChangeCommand();
@@ -315,11 +408,13 @@ private:
 
     void sendCurrentMidiMessage();
     void sendMidiMessage(int command, int data2, int data3 = UNDEFINED_MIDI_CODE);
+    
     void sendPitchBend();
 
     void handleNoteOnOffCommand();
     void handleControlCommand();
     void handleControlChangeCommand();
+    //void ordonnerTableau(int tab[], int size);
 
     void Inst_ChgCh1();
     void Inst_ChgCh2();
@@ -348,7 +443,6 @@ private:
     int CurrentChannelNumberNote = 144;
     int octav = 0;
 
-    
     int command_tampon = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
 
     int command_nt = MIDI_STATUS_NOTE_ON_FIRST_CANAL;
